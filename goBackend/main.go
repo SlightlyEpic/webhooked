@@ -4,19 +4,15 @@ import (
 	"net/http"
 
 	// "github.com/SlightlyEpic/webhooked/services"
-	"github.com/gin-gonic/gin"
+	"github.com/SlightlyEpic/webhooked/initializers"
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
 	// dbService := services.NewDatabaseService()
-	r := gin.Default()
+	r, api := initializers.InitHuma()
+	services := initializers.InitServices()
+	initializers.InitHandlers(api, services)
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	r.Run()
+	http.ListenAndServe("127.0.0.1:3001", r)
 }
