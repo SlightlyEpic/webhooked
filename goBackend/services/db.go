@@ -44,24 +44,30 @@ func (d DatabaseService) ListDatabases() ([]string, error) {
 	return d.client.ListDatabaseNames(context.TODO(), bson.D{})
 }
 
-func (d DatabaseService) CreateHook(hook models.HookInfo) (primitive.ObjectID, error) {
+func (d DatabaseService) CreateHook(hook models.HookInfo) (models.MongoHookInfo, error) {
 	res, err := d.hooksCollection.InsertOne(context.TODO(), hook)
 	if err != nil {
-		return primitive.ObjectID{}, err
+		return models.MongoHookInfo{}, err
 	}
 
 	// The function description says it WILL be primitive.ObjectID
 	id, _ := res.InsertedID.(primitive.ObjectID)
-	return id, nil
+	return models.MongoHookInfo{
+		Id:             id,
+		AnySender:      hook.AnySender,
+		SenderOrigin:   hook.SenderOrigin,
+		RecievePath:    hook.RecievePath,
+		DestinationUrl: hook.DestinationUrl,
+	}, nil
 }
 
-func (d DatabaseService) DeleteHook(id primitive.ObjectID) (int64, error) {
-	res, err := d.hooksCollection.DeleteOne(context.TODO(), bson.M{"_id": id})
+func (d DatabaseService) DeleteHook(id primitive.ObjectID) error {
+	_, err := d.hooksCollection.DeleteOne(context.TODO(), bson.M{"_id": id})
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return res.DeletedCount, nil
+	return nil
 }
 
 func (d DatabaseService) Disconnect() error {

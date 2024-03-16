@@ -6,5 +6,6 @@ import (
 )
 
 func InitHandlers(api huma.API, services Services) {
-	handlers.PingHandler(api, services.Db)
+	handlers.PingHandler(api)
+	handlers.CreateHookHandler(api, services.Db)
 }
