@@ -1,0 +1,11 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "indent": ["error", 4],
+    "semi": ["error", "always"],
+    "prefer-const": "off",
+    "camelcase": ["error", { "ignoreGlobals": true }],
+    "no-nested-ternary": "error",
+    "no-eval": "error"
+  }
+}
