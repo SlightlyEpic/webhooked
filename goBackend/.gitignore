@@ -1,1 +1,6 @@
+# Any builds
 *.exe
+
+# all env files
+.env*
+!.env.example
