@@ -1,58 +1,51 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
-	"reflect"
 
 	"github.com/SlightlyEpic/webhooked/models"
-	"github.com/danielgtaylor/huma/v2"
+	"github.com/gin-gonic/gin"
 )
 
 type createHookInput struct {
-	SenderOrigin   string `json:"senderOrigin" doc:"The origin of the site sending the webhook"`
+	AnySender      bool   `json:"anySender" doc:"Whether the webhook can be sent from any domain"`
+	SenderOrigin   string `json:"senderOrigin,omitempty" doc:"If anySender is false, then origin of the site sending the webhook"`
 	RecievePath    string `json:"recievePath" doc:"The path at which this webhook will be recieved by our servers"`
 	DestinationUrl string `json:"destinationUrl" doc:"The URL at which this webhook should be forwarded to"`
 }
 
 type createHookOutput struct {
-	Body struct {
-		Status string          `json:"status" doc:"Whether the operation was successful"`
-		Hook   models.HookInfo `json:"hook" doc:"Information about the created hook"`
-	}
+	Status string          `json:"status" doc:"Whether the operation was successful"`
+	Hook   models.HookInfo `json:"hook" doc:"Information about the created hook"`
 }
 
 func (deps *HandlerDependencies) CreateHookHandler() {
-	schema := huma.SchemaFromType(deps.Registry, reflect.TypeOf(createHookInput{}))
+	deps.Router.POST("/hook/create", func(c *gin.Context) {
+		var body createHookInput
+		if err := c.BindJSON(&body); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{
+				"error": err.Error(),
+			})
+			return
+		}
 
-	huma.Register(deps.Api, huma.Operation{
-		OperationID: "create-hook",
-		Summary:     "Create a webhook reciever",
-		Method:      http.MethodPost,
-		Path:        "/hook/create",
-		RequestBody: &huma.RequestBody{
-			Content: map[string]*huma.MediaType{
-				"application/json": {
-					Schema: schema,
-				},
-			},
-		},
-	}, func(c context.Context, input *createHookInput) (*createHookOutput, error) {
 		hook, err := deps.Db.CreateHook(models.HookInfo{
 			AnySender:      false,
-			SenderOrigin:   input.SenderOrigin,
-			RecievePath:    input.RecievePath,
-			DestinationUrl: input.DestinationUrl,
+			SenderOrigin:   body.SenderOrigin,
+			RecievePath:    body.RecievePath,
+			DestinationUrl: body.DestinationUrl,
 		})
 
 		if err != nil {
-			return nil, huma.Error500InternalServerError(err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
+				"error": err.Error(),
+			})
+			return
 		}
 
 		resp := createHookOutput{}
-		resp.Body.Status = "Success"
-		resp.Body.Hook = hook
-
-		return &resp, nil
+		resp.Status = "Success"
+		resp.Hook = hook
+		c.JSON(http.StatusOK, resp)
 	})
 }
