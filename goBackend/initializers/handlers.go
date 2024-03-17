@@ -6,6 +6,12 @@ import (
 )
 
 func InitHandlers(api huma.API, services Services) {
-	handlers.PingHandler(api)
-	handlers.CreateHookHandler(api, services.Db)
+	deps := handlers.HandlerDependencies{
+		Api:      api,
+		Registry: huma.NewMapRegistry("#/global", huma.DefaultSchemaNamer),
+		Db:       services.Db,
+	}
+
+	deps.PingHandler()
+	deps.CreateHookHandler()
 }

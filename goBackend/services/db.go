@@ -44,15 +44,15 @@ func (d DatabaseService) ListDatabases() ([]string, error) {
 	return d.client.ListDatabaseNames(context.TODO(), bson.D{})
 }
 
-func (d DatabaseService) CreateHook(hook models.HookInfo) (models.MongoHookInfo, error) {
+func (d DatabaseService) CreateHook(hook models.HookInfo) (models.HookInfo, error) {
 	res, err := d.hooksCollection.InsertOne(context.TODO(), hook)
 	if err != nil {
-		return models.MongoHookInfo{}, err
+		return models.HookInfo{}, err
 	}
 
 	// The function description says it WILL be primitive.ObjectID
 	id, _ := res.InsertedID.(primitive.ObjectID)
-	return models.MongoHookInfo{
+	return models.HookInfo{
 		Id:             id,
 		AnySender:      hook.AnySender,
 		SenderOrigin:   hook.SenderOrigin,

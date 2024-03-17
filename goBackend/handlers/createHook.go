@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"reflect"
 
 	"github.com/SlightlyEpic/webhooked/models"
-	"github.com/SlightlyEpic/webhooked/services"
 	"github.com/danielgtaylor/huma/v2"
 )
 
@@ -17,19 +17,28 @@ type createHookInput struct {
 
 type createHookOutput struct {
 	Body struct {
-		Status string               `json:"status" doc:"Whether the operation was successful"`
-		Hook   models.MongoHookInfo `json:"hook" doc:"Information about the created hook"`
+		Status string          `json:"status" doc:"Whether the operation was successful"`
+		Hook   models.HookInfo `json:"hook" doc:"Information about the created hook"`
 	}
 }
 
-func CreateHookHandler(api huma.API, db services.DatabaseService) {
-	huma.Register(api, huma.Operation{
+func (deps *HandlerDependencies) CreateHookHandler() {
+	schema := huma.SchemaFromType(deps.Registry, reflect.TypeOf(createHookInput{}))
+
+	huma.Register(deps.Api, huma.Operation{
 		OperationID: "create-hook",
 		Summary:     "Create a webhook reciever",
 		Method:      http.MethodPost,
-		Path:        "/hooks/create",
+		Path:        "/hook/create",
+		RequestBody: &huma.RequestBody{
+			Content: map[string]*huma.MediaType{
+				"application/json": {
+					Schema: schema,
+				},
+			},
+		},
 	}, func(c context.Context, input *createHookInput) (*createHookOutput, error) {
-		hook, err := db.CreateHook(models.HookInfo{
+		hook, err := deps.Db.CreateHook(models.HookInfo{
 			AnySender:      false,
 			SenderOrigin:   input.SenderOrigin,
 			RecievePath:    input.RecievePath,

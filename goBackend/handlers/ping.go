@@ -11,8 +11,8 @@ type pingOutput struct {
 	Body string
 }
 
-func PingHandler(api huma.API) {
-	huma.Register(api, huma.Operation{
+func (deps *HandlerDependencies) PingHandler() {
+	huma.Register(deps.Api, huma.Operation{
 		OperationID: "ping",
 		Summary:     "Ping the server",
 		Method:      http.MethodGet,
