@@ -7,5 +7,5 @@ import (
 
 type HandlerDependencies struct {
 	Router *gin.Engine
-	Db     services.DatabaseService
+	Db     *services.DatabaseService
 }

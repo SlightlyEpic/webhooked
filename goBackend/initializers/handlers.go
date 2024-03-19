@@ -12,5 +12,5 @@ func InitHandlers(r *gin.Engine, services Services) {
 	}
 
 	deps.PingHandler()
-	deps.CreateHookHandler()
+	deps.WebhookHandler()
 }

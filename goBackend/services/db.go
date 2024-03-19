@@ -2,67 +2,79 @@ package services
 
 import (
 	"context"
-	"os"
+	"fmt"
+	"sync"
 
 	"github.com/SlightlyEpic/webhooked/models"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DatabaseService struct {
-	client          *mongo.Client
-	database        *mongo.Database
-	hooksCollection *mongo.Collection
-	usersCollection *mongo.Collection
-	logCollection   *mongo.Collection
+	client            *mongo.Client
+	database          *mongo.Database
+	webhookCollection *mongo.Collection
+	usersCollection   *mongo.Collection
+	hookLogCollection *mongo.Collection
+
+	webhookStream   *mongo.ChangeStream
+	watcherMut      sync.Mutex
+	webhookWatchers []chan<- DocumentChangeEvent[models.WebhookInfo]
 }
 
-func NewDatabaseService() DatabaseService {
+type DatabaseServiceOptions struct {
+	ConnectionString           string
+	DatabaseName               string
+	WebhooksCollectionName     string
+	UsersCollectionsName       string
+	WebhookLogsCollectionsName string
+}
+
+func NewDatabaseService(serviceOpts DatabaseServiceOptions) *DatabaseService {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(os.Getenv("MONGO_CONN_STRING")).SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI(serviceOpts.ConnectionString).SetServerAPIOptions(serverAPI)
 
 	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
 		panic(err)
 	}
 
-	db := client.Database(os.Getenv("MONGO_DB_NAME"))
+	db := client.Database(serviceOpts.DatabaseName)
 
-	return DatabaseService{
-		client:          client,
-		database:        db,
-		hooksCollection: db.Collection("hooks"),
-		usersCollection: db.Collection("users"),
-		logCollection:   db.Collection("hookLogs"),
-	}
-}
+	webhookCollection := db.Collection(serviceOpts.WebhooksCollectionName)
+	hookStream, err := webhookCollection.Watch(context.TODO(), mongo.Pipeline{})
 
-func (d DatabaseService) ListDatabases() ([]string, error) {
-	return d.client.ListDatabaseNames(context.TODO(), bson.D{})
-}
-
-func (d DatabaseService) CreateHook(hook models.HookInfo) (models.HookInfo, error) {
-	res, err := d.hooksCollection.InsertOne(context.TODO(), hook)
 	if err != nil {
-		return models.HookInfo{}, err
+		panic(fmt.Errorf("failed to create webhook collection stream: %v", err))
 	}
 
-	// The function description says it WILL be primitive.ObjectID
-	id, _ := res.InsertedID.(primitive.ObjectID)
-	return models.HookInfo{
-		Id:             id,
-		AnySender:      hook.AnySender,
-		SenderOrigin:   hook.SenderOrigin,
-		RecievePath:    hook.RecievePath,
-		DestinationUrl: hook.DestinationUrl,
-	}, nil
+	serv := &DatabaseService{
+		client:            client,
+		database:          db,
+		webhookCollection: webhookCollection,
+		usersCollection:   db.Collection(serviceOpts.UsersCollectionsName),
+		hookLogCollection: db.Collection(serviceOpts.WebhookLogsCollectionsName),
+
+		webhookStream:   hookStream,
+		watcherMut:      sync.Mutex{},
+		webhookWatchers: make([]chan<- DocumentChangeEvent[models.WebhookInfo], 0),
+	}
+
+	// ~ Watch and relay any changes in WebhookInfo collection
+	go watchWebhookStream(serv)
+
+	return serv
 }
 
-func (d DatabaseService) DeleteHook(id primitive.ObjectID) error {
-	_, err := d.hooksCollection.DeleteOne(context.TODO(), bson.M{"_id": id})
+func DestroyDatabaseService(d *DatabaseService) error {
+	err := d.webhookStream.Close(context.TODO())
+	if err != nil {
+		return err
+	}
+
+	err = d.client.Disconnect(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -70,6 +82,43 @@ func (d DatabaseService) DeleteHook(id primitive.ObjectID) error {
 	return nil
 }
 
-func (d DatabaseService) Disconnect() error {
+func (d *DatabaseService) ListDatabases() ([]string, error) {
+	return d.client.ListDatabaseNames(context.TODO(), bson.D{})
+}
+
+func (d *DatabaseService) Webhooks() ([]models.WebhookInfo, error) {
+	coll := d.webhookCollection
+	cursor, err := coll.Find(context.TODO(), bson.D{})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var webhooks []models.WebhookInfo
+	err = cursor.All(context.TODO(), webhooks)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return webhooks, nil
+}
+
+func (d *DatabaseService) ActiveWebhooks() ([]models.WebhookInfo, error) {
+	filter := bson.D{{Key: "archived", Value: false}}
+	cursor, err := d.webhookCollection.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var data []models.WebhookInfo
+	err = cursor.All(context.TODO(), &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (d *DatabaseService) Disconnect() error {
 	return d.client.Disconnect(context.TODO())
 }

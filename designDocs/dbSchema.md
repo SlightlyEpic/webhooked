@@ -8,12 +8,14 @@ Schemas are described using TS-ish syntax
 ```ts
 type WebhookInfo = {
     _id: string                 // uid assigned to this webhook recieving endpoint by mongo
-    recievePath: string         // The path at which the server will listen for this webhook
     destinationUrls: string[]   // Array of URLs to which the webhook will be forwarded to
     log: WebhookLogEntry._id[]  // An array of _ids of log entries which correspond to this webhook
     owner: User._id             // The _id of the owner of this webhook
+    archived: boolean           // Deleted webhooks get archived, because the logs might still reference the document
 }
+
 ```
+The path the webhook is recieved at is derived from the id
 
 ---
 
