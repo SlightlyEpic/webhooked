@@ -8,11 +8,11 @@ import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover"
-import { IoLogOutOutline } from "react-icons/io5";
-import { IoIosSettings } from "react-icons/io";
-import { IoDocumentTextOutline } from "react-icons/io5";
-import { IoGitBranchOutline } from "react-icons/io5";
+} from '@/components/ui/popover';
+import { IoLogOutOutline } from 'react-icons/io5';
+import { IoIosSettings } from 'react-icons/io';
+import { IoDocumentTextOutline } from 'react-icons/io5';
+import { IoGitBranchOutline } from 'react-icons/io5';
 
 function UserButton() {
     const { data: session } = useSession();
@@ -25,7 +25,7 @@ function UserButton() {
         <Popover>
             <PopoverTrigger className='w-full'>
                 <div className='flex gap-2 m-2 p-2 rounded-md items-center hover:bg-zinc-800'>
-                    <Image src={`${session?.user?.image}` || ""} alt="user avatar" width={20} height={10} className='w-4 h-4 rounded-full inline' />
+                    <Image src={session?.user?.image || ''} alt="user avatar" width={20} height={10} className='w-4 h-4 rounded-full inline' />
                     <p className='m-0 text-sm'>{session?.user?.name}</p>
                 </div>
             </PopoverTrigger>
@@ -52,7 +52,7 @@ function DocsButton() {
     return <a className='text-left gap-2 items-center flex p-2 m-2 rounded-md hover:bg-zinc-800' href='/docs'>
         <IoDocumentTextOutline />
         <span>Documentation</span>
-    </a>
+    </a>;
 }
 
 

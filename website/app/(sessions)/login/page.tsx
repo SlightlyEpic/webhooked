@@ -9,7 +9,7 @@ import { redirect } from 'next/navigation';
 const Home: NextPage = () => {
     const { data: session } = useSession();
     if (session) {
-        redirect('/dashboard')
+        redirect('/dashboard');
     }
     return (
         <div className='flex justify-center items-center min-h-screen relative overflow-clip'>
