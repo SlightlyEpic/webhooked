@@ -6,7 +6,7 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <main className="mx-auto max-w-5xl text-2xl flex gap-2 bg-green-500">
+        <main className="text-2xl flex gap-2 bg-zinc-800">
             <Sidenav />
             {children}
         </main>
