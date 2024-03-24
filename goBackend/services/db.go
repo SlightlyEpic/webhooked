@@ -119,6 +119,15 @@ func (d *DatabaseService) ActiveWebhooks() ([]models.WebhookInfo, error) {
 	return data, nil
 }
 
+func (d *DatabaseService) PushWebhookLog(doc *models.WebhookLogEntry) error {
+	_, err := d.hookLogCollection.InsertOne(context.TODO(), *doc)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *DatabaseService) Disconnect() error {
 	return d.client.Disconnect(context.TODO())
 }
