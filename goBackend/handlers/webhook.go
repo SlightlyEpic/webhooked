@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,8 +20,8 @@ import (
 type webhookInfoChangeEvent = services.DocumentChangeEvent[models.WebhookInfo]
 type idDestUrlsMap = map[string]([]string)
 
-func (deps *HandlerDependencies) WebhookHandler() {
-	hooks, err := deps.Db.ActiveWebhooks()
+func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.HandlerFunc {
+	hooks, err := deps.Db.ActiveWebhooks(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -37,13 +38,13 @@ func (deps *HandlerDependencies) WebhookHandler() {
 	// ~ Respond to changes in db
 	ch := make(chan webhookInfoChangeEvent)
 	deps.Db.AddWebhookWatcher(ch)
-	go deps.handleChangeEvent(ch, hookLookup, &lookupRWMutex)
+	go deps.handleChangeEvent(ctx, ch, hookLookup, &lookupRWMutex)
 
 	// ~ http client that sends the POST requests to destination urls
 	httpClient := http.Client{}
 
 	// ~ Dynamic route that will forward webhook if such a WebhookInfo record exists, else return a 404
-	deps.Router.POST("/webhook/:webhookId", func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
 		hookId := ctx.Param("webhookId")
 		lookupRWMutex.RLock()
 		destUrls, ok := hookLookup[hookId]
@@ -73,7 +74,7 @@ func (deps *HandlerDependencies) WebhookHandler() {
 
 		ctx.JSON(http.StatusOK, gin.H{"message": "Success"})
 
-		go func(ctx *gin.Context) {
+		go func(ginCtx *gin.Context, ctx context.Context) {
 			successCounter := atomic.Int32{}
 			wg := sync.WaitGroup{}
 			wg.Add(len(destUrls))
@@ -82,13 +83,13 @@ func (deps *HandlerDependencies) WebhookHandler() {
 				go func() {
 					defer wg.Done()
 
-					req, err := http.NewRequest("POST", destUrl, bytes.NewReader(reqBody))
+					req, err := http.NewRequestWithContext(ctx, "POST", destUrl, bytes.NewReader(reqBody))
 					if err != nil {
 						fmt.Printf("/webhook/%s -> %s: Failed to create request\n", hookId, destUrl)
 						return
 					}
 
-					req.Header.Add("Content-Type", ctx.GetHeader("Content-Type"))
+					req.Header.Add("Content-Type", ginCtx.GetHeader("Content-Type"))
 
 					resp, err := httpClient.Do(req)
 					if err != nil {
@@ -116,33 +117,44 @@ func (deps *HandlerDependencies) WebhookHandler() {
 			record := models.WebhookLogEntry{
 				Id:                 timeRecieved,
 				WebhookId:          hookObjId,
-				SenderIp:           ctx.Request.RemoteAddr,
+				SenderIp:           ginCtx.Request.RemoteAddr,
 				SuccessfulForwards: succCount,
 				Data:               data,
 			}
 
-			deps.Db.PushWebhookLog(&record)
-		}(ctx.Copy())
-	})
+			deps.Db.PushWebhookLog(ctx, &record)
+		}(ctx.Copy(), ctx)
+	}
 }
 
-func (deps *HandlerDependencies) handleChangeEvent(watcher <-chan webhookInfoChangeEvent, hookLookup idDestUrlsMap, lookupRWMutex *sync.RWMutex) {
-	for evt := range watcher {
-		lookupRWMutex.Lock()
+func (deps *handlerDependencies) handleChangeEvent(
+	ctx context.Context,
+	watcher <-chan webhookInfoChangeEvent,
+	hookLookup idDestUrlsMap,
+	lookupRWMutex *sync.RWMutex,
+) {
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("webhook: change event handler closing")
+			return
+		case evt := <-watcher:
+			lookupRWMutex.Lock()
 
-		switch evt.OperationType {
-		case "insert":
-			hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
-		case "update":
-			if evt.FullDocument.Archived {
+			switch evt.OperationType {
+			case "insert":
 				hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
-			} else {
+			case "update":
+				if evt.FullDocument.Archived {
+					hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
+				} else {
+					delete(hookLookup, evt.DocumentKey.Id.Hex())
+				}
+			case "delete":
 				delete(hookLookup, evt.DocumentKey.Id.Hex())
 			}
-		case "delete":
-			delete(hookLookup, evt.DocumentKey.Id.Hex())
-		}
 
-		lookupRWMutex.Unlock()
+			lookupRWMutex.Unlock()
+		}
 	}
 }

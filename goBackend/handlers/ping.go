@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (deps *HandlerDependencies) PingHandler() {
-	deps.Router.GET("/ping", func(c *gin.Context) {
+func (deps *handlerDependencies) PingHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
 		c.String(200, "Pong")
-	})
+	}
 }

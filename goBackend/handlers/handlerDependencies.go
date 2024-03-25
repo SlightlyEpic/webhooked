@@ -2,10 +2,17 @@ package handlers
 
 import (
 	"github.com/SlightlyEpic/webhooked/services"
-	"github.com/gin-gonic/gin"
 )
 
-type HandlerDependencies struct {
-	Router *gin.Engine
-	Db     *services.DatabaseService
+type handlerDependencies struct {
+	Db *services.DatabaseService
+}
+
+func DefaultDependencies() *handlerDependencies {
+	return &handlerDependencies{}
+}
+
+func (deps *handlerDependencies) WithDb(db *services.DatabaseService) *handlerDependencies {
+	deps.Db = db
+	return deps
 }
