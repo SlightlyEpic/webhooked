@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,8 +20,8 @@ import (
 type webhookInfoChangeEvent = services.DocumentChangeEvent[models.WebhookInfo]
 type idDestUrlsMap = map[string]([]string)
 
-func (deps *HandlerDependencies) WebhookHandler() {
-	hooks, err := deps.Db.ActiveWebhooks()
+func (deps *HandlerDependencies) WebhookHandler(ctx context.Context) {
+	hooks, err := deps.Db.ActiveWebhooks(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +38,7 @@ func (deps *HandlerDependencies) WebhookHandler() {
 	// ~ Respond to changes in db
 	ch := make(chan webhookInfoChangeEvent)
 	deps.Db.AddWebhookWatcher(ch)
-	go deps.handleChangeEvent(ch, hookLookup, &lookupRWMutex)
+	go deps.handleChangeEvent(ctx, ch, hookLookup, &lookupRWMutex)
 
 	// ~ http client that sends the POST requests to destination urls
 	httpClient := http.Client{}
@@ -121,28 +122,38 @@ func (deps *HandlerDependencies) WebhookHandler() {
 				Data:               data,
 			}
 
-			deps.Db.PushWebhookLog(&record)
+			deps.Db.PushWebhookLog(ctx, &record)
 		}(ctx.Copy())
 	})
 }
 
-func (deps *HandlerDependencies) handleChangeEvent(watcher <-chan webhookInfoChangeEvent, hookLookup idDestUrlsMap, lookupRWMutex *sync.RWMutex) {
-	for evt := range watcher {
-		lookupRWMutex.Lock()
+func (deps *HandlerDependencies) handleChangeEvent(
+	ctx context.Context,
+	watcher <-chan webhookInfoChangeEvent,
+	hookLookup idDestUrlsMap,
+	lookupRWMutex *sync.RWMutex,
+) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case evt := <-watcher:
+			lookupRWMutex.Lock()
 
-		switch evt.OperationType {
-		case "insert":
-			hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
-		case "update":
-			if evt.FullDocument.Archived {
+			switch evt.OperationType {
+			case "insert":
 				hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
-			} else {
+			case "update":
+				if evt.FullDocument.Archived {
+					hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
+				} else {
+					delete(hookLookup, evt.DocumentKey.Id.Hex())
+				}
+			case "delete":
 				delete(hookLookup, evt.DocumentKey.Id.Hex())
 			}
-		case "delete":
-			delete(hookLookup, evt.DocumentKey.Id.Hex())
-		}
 
-		lookupRWMutex.Unlock()
+			lookupRWMutex.Unlock()
+		}
 	}
 }
