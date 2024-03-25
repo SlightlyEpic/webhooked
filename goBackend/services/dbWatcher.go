@@ -24,10 +24,11 @@ type DocumentChangeEvent[T any] struct {
 func watchWebhookStream(ctx context.Context, serv *DatabaseService) {
 	webhookStream, err := serv.webhookCollection.Watch(ctx, mongo.Pipeline{})
 	defer func() {
-		fmt.Printf("Closing changestream\n")
-		err := webhookStream.Close(context.Background())
+		err := webhookStream.Close(ctx)
 		if err != nil {
-			// ! Log this once logging is set up
+			fmt.Printf("dbwatcher: error closing changestream %s\n", err.Error())
+		} else {
+			fmt.Println("dbwatcher: changestream closed")
 		}
 	}()
 

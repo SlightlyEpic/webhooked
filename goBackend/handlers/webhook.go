@@ -20,7 +20,7 @@ import (
 type webhookInfoChangeEvent = services.DocumentChangeEvent[models.WebhookInfo]
 type idDestUrlsMap = map[string]([]string)
 
-func (deps *HandlerDependencies) WebhookHandler(ctx context.Context) {
+func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.HandlerFunc {
 	hooks, err := deps.Db.ActiveWebhooks(ctx)
 	if err != nil {
 		panic(err)
@@ -44,7 +44,7 @@ func (deps *HandlerDependencies) WebhookHandler(ctx context.Context) {
 	httpClient := http.Client{}
 
 	// ~ Dynamic route that will forward webhook if such a WebhookInfo record exists, else return a 404
-	deps.Router.POST("/webhook/:webhookId", func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
 		hookId := ctx.Param("webhookId")
 		lookupRWMutex.RLock()
 		destUrls, ok := hookLookup[hookId]
@@ -74,7 +74,7 @@ func (deps *HandlerDependencies) WebhookHandler(ctx context.Context) {
 
 		ctx.JSON(http.StatusOK, gin.H{"message": "Success"})
 
-		go func(ctx *gin.Context) {
+		go func(ginCtx *gin.Context, ctx context.Context) {
 			successCounter := atomic.Int32{}
 			wg := sync.WaitGroup{}
 			wg.Add(len(destUrls))
@@ -83,13 +83,13 @@ func (deps *HandlerDependencies) WebhookHandler(ctx context.Context) {
 				go func() {
 					defer wg.Done()
 
-					req, err := http.NewRequest("POST", destUrl, bytes.NewReader(reqBody))
+					req, err := http.NewRequestWithContext(ctx, "POST", destUrl, bytes.NewReader(reqBody))
 					if err != nil {
 						fmt.Printf("/webhook/%s -> %s: Failed to create request\n", hookId, destUrl)
 						return
 					}
 
-					req.Header.Add("Content-Type", ctx.GetHeader("Content-Type"))
+					req.Header.Add("Content-Type", ginCtx.GetHeader("Content-Type"))
 
 					resp, err := httpClient.Do(req)
 					if err != nil {
@@ -117,17 +117,17 @@ func (deps *HandlerDependencies) WebhookHandler(ctx context.Context) {
 			record := models.WebhookLogEntry{
 				Id:                 timeRecieved,
 				WebhookId:          hookObjId,
-				SenderIp:           ctx.Request.RemoteAddr,
+				SenderIp:           ginCtx.Request.RemoteAddr,
 				SuccessfulForwards: succCount,
 				Data:               data,
 			}
 
 			deps.Db.PushWebhookLog(ctx, &record)
-		}(ctx.Copy())
-	})
+		}(ctx.Copy(), ctx)
+	}
 }
 
-func (deps *HandlerDependencies) handleChangeEvent(
+func (deps *handlerDependencies) handleChangeEvent(
 	ctx context.Context,
 	watcher <-chan webhookInfoChangeEvent,
 	hookLookup idDestUrlsMap,
@@ -136,6 +136,7 @@ func (deps *HandlerDependencies) handleChangeEvent(
 	for {
 		select {
 		case <-ctx.Done():
+			fmt.Println("webhook: change event handler closing")
 			return
 		case evt := <-watcher:
 			lookupRWMutex.Lock()
