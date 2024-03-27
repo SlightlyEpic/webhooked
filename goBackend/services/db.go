@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 
 	"github.com/SlightlyEpic/webhooked/models"
@@ -28,27 +29,28 @@ type DatabaseServiceOptions struct {
 	WebhooksCollectionName     string
 	UsersCollectionsName       string
 	WebhookLogsCollectionsName string
+	logger                     *slog.Logger
 }
 
-func NewDatabaseService(ctx context.Context, serviceOpts DatabaseServiceOptions) *DatabaseService {
+func NewDatabaseService(ctx context.Context, opts DatabaseServiceOptions) *DatabaseService {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(serviceOpts.ConnectionString).SetServerAPIOptions(serverAPI)
+	mongoOpts := options.Client().ApplyURI(opts.ConnectionString).SetServerAPIOptions(serverAPI)
 
-	client, err := mongo.Connect(ctx, opts)
+	client, err := mongo.Connect(ctx, mongoOpts)
 	if err != nil {
 		panic(err)
 	}
 
-	db := client.Database(serviceOpts.DatabaseName)
+	db := client.Database(opts.DatabaseName)
 
-	webhookCollection := db.Collection(serviceOpts.WebhooksCollectionName)
+	webhookCollection := db.Collection(opts.WebhooksCollectionName)
 
 	serv := &DatabaseService{
 		client:            client,
 		database:          db,
 		webhookCollection: webhookCollection,
-		usersCollection:   db.Collection(serviceOpts.UsersCollectionsName),
-		hookLogCollection: db.Collection(serviceOpts.WebhookLogsCollectionsName),
+		usersCollection:   db.Collection(opts.UsersCollectionsName),
+		hookLogCollection: db.Collection(opts.WebhookLogsCollectionsName),
 
 		watcherMutex:    sync.RWMutex{},
 		webhookWatchers: make([]chan<- DocumentChangeEvent[models.WebhookInfo], 0),
