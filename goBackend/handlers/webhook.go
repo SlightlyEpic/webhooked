@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"sync"
@@ -85,7 +84,11 @@ func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.Handler
 
 					req, err := http.NewRequestWithContext(ctx, "POST", destUrl, bytes.NewReader(reqBody))
 					if err != nil {
-						fmt.Printf("/webhook/%s -> %s: Failed to create request\n", hookId, destUrl)
+						deps.logger.Error(
+							"Error creating request",
+							"webhookId", hookId,
+							"destinationURL", destUrl,
+						)
 						return
 					}
 
@@ -93,7 +96,12 @@ func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.Handler
 
 					resp, err := httpClient.Do(req)
 					if err != nil {
-						fmt.Printf("/webhook/%s -> %s: %s\n", hookId, destUrl, err)
+						deps.logger.Error(
+							"Error sending request",
+							"webhookId", hookId,
+							"destinationURL", destUrl,
+							"error", err.Error(),
+						)
 						return
 					}
 
@@ -108,7 +116,10 @@ func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.Handler
 			hookObjId, err := primitive.ObjectIDFromHex(hookId)
 
 			if err != nil {
-				// ! Log this when logger is setup
+				deps.logger.Error(
+					"Error converting webhookId to ObjectID",
+					"error", err.Error(),
+				)
 				return
 			}
 
@@ -136,7 +147,7 @@ func (deps *handlerDependencies) handleChangeEvent(
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("webhook: change event handler closing")
+			deps.logger.Info("WebhookInfo change event handler closing")
 			return
 		case evt := <-watcher:
 			lookupRWMutex.Lock()
