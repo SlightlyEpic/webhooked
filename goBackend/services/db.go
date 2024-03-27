@@ -21,6 +21,7 @@ type DatabaseService struct {
 
 	watcherMutex    sync.RWMutex
 	webhookWatchers []chan<- DocumentChangeEvent[models.WebhookInfo]
+	logger          *slog.Logger
 }
 
 type DatabaseServiceOptions struct {
@@ -54,6 +55,7 @@ func NewDatabaseService(ctx context.Context, opts DatabaseServiceOptions) *Datab
 
 		watcherMutex:    sync.RWMutex{},
 		webhookWatchers: make([]chan<- DocumentChangeEvent[models.WebhookInfo], 0),
+		logger:          opts.Logger,
 	}
 
 	// ~ Watch and relay any changes in WebhookInfo collection
