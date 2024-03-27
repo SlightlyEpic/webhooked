@@ -29,7 +29,7 @@ type DatabaseServiceOptions struct {
 	WebhooksCollectionName     string
 	UsersCollectionsName       string
 	WebhookLogsCollectionsName string
-	logger                     *slog.Logger
+	Logger                     *slog.Logger
 }
 
 func NewDatabaseService(ctx context.Context, opts DatabaseServiceOptions) *DatabaseService {

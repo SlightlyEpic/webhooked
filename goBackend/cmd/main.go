@@ -23,9 +23,9 @@ func run(ctx context.Context, logStream io.Writer, args []string, getenv func(st
 	}
 	logger := slog.New(slog.NewJSONHandler(logStream, loggerOpts))
 
-	r, srv := initializers.InitServer()
-	services := initializers.InitServices(ctx)
-	initializers.InitRoutes(ctx, r, services)
+	r, srv := initializers.InitServer(logger.With("_from", "gin"))
+	services := initializers.InitServices(ctx, logger.With("_from", "services"))
+	initializers.InitRoutes(ctx, r, logger.With("_from", "handlers"), services)
 
 	go func() {
 		if err := http.ListenAndServe("127.0.0.1:3001", r); err != nil && err != http.ErrServerClosed {
