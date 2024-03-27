@@ -26,14 +26,17 @@ func watchWebhookStream(ctx context.Context, serv *DatabaseService) {
 	defer func() {
 		err := webhookStream.Close(ctx)
 		if err != nil {
-			fmt.Printf("dbwatcher: error closing changestream %s\n", err.Error())
+			serv.logger.Error(
+				"Error closing mongo changestream",
+				"error", err.Error(),
+			)
 		} else {
-			fmt.Println("dbwatcher: changestream closed")
+			serv.logger.Info("mongo changestream closed")
 		}
 	}()
 
 	if err != nil {
-		panic(fmt.Errorf("failed to create webhook collection stream: %v", err))
+		panic(fmt.Sprintf("failed to create webhook collection stream: %v", err))
 	}
 
 	for webhookStream.Next(ctx) {

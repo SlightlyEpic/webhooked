@@ -1,13 +1,22 @@
 package initializers
 
 import (
+	"log/slog"
 	"net/http"
 
+	"github.com/SlightlyEpic/webhooked/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-func InitServer() (*gin.Engine, *http.Server) {
-	r := gin.Default()
+func InitServer(logger *slog.Logger, useSlog bool) (*gin.Engine, *http.Server) {
+	var r *gin.Engine
+	if useSlog {
+		r = gin.New()
+		r.Use(middleware.Logger(logger))
+		r.Use(gin.Recovery())
+	} else {
+		r = gin.Default()
+	}
 
 	srv := &http.Server{
 		Addr:    ":3001",
