@@ -1,6 +1,4 @@
 import { getServerSession } from 'next-auth';
-import { getSession } from 'next-auth/react';
-import Sidenav from '@/components/dashboard/Sidenav';
 import { SessionProvider } from '@/components/SessionProvider';
 
 

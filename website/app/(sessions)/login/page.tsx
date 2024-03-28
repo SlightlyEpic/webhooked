@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/shadcn/ui/button';
 import type { NextPage } from 'next';
 import { signIn, useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -18,7 +18,7 @@ const Home: NextPage = () => {
                 <div className='bg-zinc-100 p-4 gap-6 flex flex-col justify-between rounded relative text-center items-center'>
                     <p className='text-white font-bold text-3xl drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,1)] p-2 text-center absolute -top-12 w-full'>Webhooked</p>
                     <h1 >Sign in to your account</h1>
-                    <Button onClick={() => signIn('github', { callbackUrl: '/dashboard' })} className='bg-green-700 hover:bg-green-700 hover:border-black border-2 gap-1'>
+                    <Button onClick={() => signIn('github', { callbackUrl: '/dashboard' })}>
                         <Image src="/icons/github.svg" width={15} height={15} alt="github logo" />
                         Sign in with Github
                     </Button>

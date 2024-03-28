@@ -1,5 +1,3 @@
-import Sidenav from '@/components/dashboard/Sidenav';
-
 export default async function RootLayout({
     children,
 }: Readonly<{
@@ -7,7 +5,7 @@ export default async function RootLayout({
 }>) {
     return (
         <main className="text-2xl flex gap-2 bg-zinc-800">
-            <Sidenav />
+            {/* <Sidenav /> */}
             {children}
         </main>
     );
