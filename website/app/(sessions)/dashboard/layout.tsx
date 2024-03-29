@@ -1,12 +1,18 @@
+import Sidebar from '@/components/dashboard/Sidebar';
+import Header from '@/components/dashboard/Header';
+
 export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <main className="text-2xl flex gap-2 bg-zinc-800">
-            {/* <Sidenav /> */}
-            {children}
-        </main>
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <Sidebar />
+            <div className="flex flex-col">
+                <Header />
+                {children}
+            </div>
+        </div>
     );
 }
