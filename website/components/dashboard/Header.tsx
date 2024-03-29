@@ -30,9 +30,9 @@ export default function Header() {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Support</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                <DropdownMenuItem>
+                    <div className='text-rose-500 font-medium'>Logout</div>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     </header>;

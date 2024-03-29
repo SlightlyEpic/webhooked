@@ -18,6 +18,11 @@ const config = {
             },
         },
         extend: {
+            // For tailwind container queries
+            containers: {
+                '2xs': '16rem',
+                '3xs': '8rem'
+            },
             backgroundImage: {
                 'purple-gradient': 'linear-gradient(to top left,#5271C4,#B19FFF,#ECA1FE)'
             },

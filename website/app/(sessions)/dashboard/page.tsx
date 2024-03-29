@@ -4,13 +4,13 @@ import { Button } from '@/components/shadcn/ui/button';
 import { Card, CardDescription, CardTitle } from '@/components/shadcn/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/shadcn/ui/resizable';
 import { Separator } from '@/components/shadcn/ui/separator';
-import { Github } from 'lucide-react';
+import { Clock2, Ellipsis, Github, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 const sampleWebhookData = [
     {
-        _id: '1',
+        _id: '6606edac318a0d68659bfef5',
         destinationUrls: ['https://example.com/webhook'],
         log: ['1', '2', '3'],
         owner: '1',
@@ -18,7 +18,7 @@ const sampleWebhookData = [
         createdOn: '2021-10-10T00:00:00.000Z'
     },
     {
-        _id: '2',
+        _id: '6606edb56c85e8d5655e6496',
         destinationUrls: ['https://example.com/webhook'],
         log: ['4', '5', '6'],
         owner: '1',
@@ -26,7 +26,7 @@ const sampleWebhookData = [
         createdOn: '2021-10-10T00:00:00.000Z'
     },
     {
-        _id: '3',
+        _id: '6606edbb76eeff2e120df87c',
         destinationUrls: ['https://example.com/webhook'],
         log: ['7', '8', '9'],
         owner: '1',
@@ -58,34 +58,54 @@ export default function Page() {
                 </div>
             </div>
             <ResizablePanelGroup direction='horizontal' className='gap-4' style={{ overflow: 'visible' }}>
-                <ResizablePanel className='hidden lg:flex' defaultSize={50}>
-                    <Card className='h-fit w-full p-4'>
-                        <CardTitle>Recent logs</CardTitle>
-                    </Card>
+                <ResizablePanel className='hidden lg:flex @container' defaultSize={50}>
+                    <div className='flex @3xs:hidden items-center justify-center h-full'>
+                        <Ellipsis className='block @3xs:hidden h-16 w-16 text-muted self-center justify-self-center' />
+                    </div>
+
+                    <div className='hidden @3xs:flex flex-col h-full w-full'>
+                        <Card className='h-fit w-full p-4'>
+                            <CardTitle className='flex gap-4 items-center'>
+                                <Clock2 className='h-6 w-6' />
+                                Recent logs
+                            </CardTitle>
+                        </Card>
+                    </div>
                 </ResizablePanel>
                 <ResizableHandle withHandle className='hidden lg:flex' />
-                <ResizablePanel defaultSize={50} style={{ overflow: 'visible' }}>
-                    <div className='@container flex flex-col h-full gap-4'>
+                <ResizablePanel defaultSize={50} style={{ overflow: 'visible' }} className='@container'>
+                    <div className='flex @3xs:hidden items-center justify-center h-full'>
+                        <Ellipsis className='h-16 w-16 text-muted' />
+                    </div>
+
+                    <div className='hidden @3xs:flex flex-col h-full gap-4'>
                         <Card className='h-fit w-full p-4 box-border'>
-                            <CardTitle>Recent webhooks</CardTitle>
+                            <CardTitle className='flex gap-2 items-center'>
+                                <Star className='h-6 w-6 text-yellow-400' />
+                                Starred webhooks
+                            </CardTitle>
                         </Card>
 
                         <div className='overflow-clip flex flex-col gap-4 shrink @sm:[&>*:nth-child(2)]:flex @xl:[&>*:nth-child(3)]:flex'>
                             {sampleWebhookData.slice(0, 3).map(webhook => 
                                 <Card key={webhook._id} className='hidden first:flex flex-col p-4 gap-4'>
-                                    <CardTitle className='flex items-center'>
-                                        <div>{webhook._id}</div>
-                                        <Button className='ml-auto' variant='link'>
-                                            <Link href={`/dashboard/logs/${webhook._id}`}>
-                                                View log
-                                            </Link>
-                                        </Button>
-                                        <Badge variant={webhook.archived ? 'outline' : 'default'}>
-                                            {webhook.archived ? 'Inactive' : 'Active'}
-                                        </Badge>
+                                    <CardTitle className='flex flex-col gap-4 @lg:flex-row items-start @lg:items-center'>
+                                        <Link href={`/dashboard/webhooks/${webhook._id}`} className='hover:underline font-mono'>
+                                            {webhook._id}
+                                        </Link>
+                                        <div className='flex gap-4 @lg:ml-auto h-min items-center'>
+                                            <Button className='p-0' variant='link'>
+                                                <Link href={`/dashboard/logs/${webhook._id}`}>
+                                                    View log
+                                                </Link>
+                                            </Button>
+                                            <Badge variant={webhook.archived ? 'outline' : 'default'} className='w-16 justify-center'>
+                                                {webhook.archived ? 'Inactive' : 'Active'}
+                                            </Badge>
+                                        </div>
                                     </CardTitle>
                                     <CardDescription>
-                                        Created on: {webhook.createdOn}
+                                        Created: {webhook.createdOn}
                                     </CardDescription>
                                 </Card>
                             )}
@@ -105,10 +125,10 @@ export default function Page() {
                             </Button>
                             <Button>
                                 <Link href='/dashboard/auth'>
-                                    Configure authentication
+                                    Authentication
                                 </Link>
                             </Button>
-                            <Button variant='link'>
+                            <Button variant='link' className='border border-muted hover:border-primary transition-none'>
                                 <Link href='https://github.com/SlightlyEpic/webhooked' className='flex gap-2 items-center'>
                                     <Github className='h-4 w-4' /> View source
                                 </Link>

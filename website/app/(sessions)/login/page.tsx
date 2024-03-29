@@ -18,7 +18,7 @@ const Home: NextPage = () => {
     }
 
     return (
-        <div className='h-screen w-full bg-black flex flex-col items-center justify-between p-2'>
+        <div className='h-screen top-0 sticky w-full bg-black flex flex-col items-center justify-between p-2'>
             <div className='w-full'>
                 <NavigationMenu className='w-full grow-0 [&>*]:grow'>
                     <NavigationMenuList className='w-full justify-end'>
