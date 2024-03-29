@@ -2,7 +2,7 @@
 
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle, } from '@/components/shadcn/ui/card';
 import { Button } from '@/components/shadcn/ui/button';
-import { Github } from 'lucide-react';
+import { Github, Webhook } from 'lucide-react';
 import type { NextPage } from 'next';
 import { signIn, useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
@@ -23,12 +23,9 @@ const Home: NextPage = () => {
                 <NavigationMenu className='w-full grow-0 [&>*]:grow'>
                     <NavigationMenuList className='w-full justify-end'>
                         <NavigationMenuItem className='mr-auto'>
-                            <Image
-                                src='/favicon.ico'
-                                width={48}
-                                height={48}
-                                alt='Webhooked Logo'
-                            />
+                            <Link href='/'>
+                                <Webhook className='ml-2' />
+                            </Link>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
                             <Link href='/guide' legacyBehavior passHref>
@@ -43,10 +40,10 @@ const Home: NextPage = () => {
                     </NavigationMenuList>
                 </NavigationMenu>
 
-                <Separator />
+                <Separator className='my-2' />
             </div>
 
-            <div className='w-full h-full max-w-lg max-h-72 p-px rounded-md hover:bg-purple-gradient'>
+            <div className='w-full h-full max-w-lg max-h-72 p-px rounded-md'>
                 <Card className='w-full h-full rounded-md flex flex-col justify-between'>
                     <CardHeader>
                         <CardTitle>Login to Webhooked</CardTitle>
