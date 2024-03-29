@@ -106,10 +106,14 @@
 
 @layer base {
   * {
-    @apply border-border theme-custom;
+    @apply border-border theme-custom box-border;
+  }
+
+  html {
+    @apply min-h-screen
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-screen h-full;
   }
 }

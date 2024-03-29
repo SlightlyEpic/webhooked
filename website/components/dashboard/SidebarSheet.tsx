@@ -14,17 +14,17 @@ const sidebarLinks = [
         text: 'Dashboard',
     },
     {
-        href: '/webhooks',
+        href: '/dashboard/webhooks',
         icon: Cable,
         text: 'Webhooks',
     },
     {
-        href: '/logs',
+        href: '/dashboard/logs',
         icon: FileClock,
         text: 'Logs',
     },
     {
-        href: '/authentication',
+        href: '/dashboard/auth',
         icon: KeyRound,
         text: 'Authentication',
     },
