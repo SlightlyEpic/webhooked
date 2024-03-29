@@ -1,32 +1,67 @@
 'use client';
 
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle, } from '@/components/shadcn/ui/card';
 import { Button } from '@/components/shadcn/ui/button';
+import { Github } from 'lucide-react';
 import type { NextPage } from 'next';
 import { signIn, useSession } from 'next-auth/react';
-import Image from 'next/image';
 import { redirect } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Separator } from '@/components/shadcn/ui/separator';
+import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/shadcn/ui/navigation-menu';
 
 const Home: NextPage = () => {
     const { data: session } = useSession();
     if (session) {
         redirect('/dashboard');
     }
+
     return (
-        <div className='flex justify-center items-center min-h-screen relative overflow-clip'>
-            <Image src='/dark-wallpaper.svg' alt='background' fill className='object-cover absolute -z-10 scale-[1.001]' />
-            <div>
-                <div className='bg-zinc-100 p-4 gap-6 flex flex-col justify-between rounded relative text-center items-center'>
-                    <p className='text-white font-bold text-3xl drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,1)] p-2 text-center absolute -top-12 w-full'>Webhooked</p>
-                    <h1 >Sign in to your account</h1>
-                    <Button onClick={() => signIn('github', { callbackUrl: '/dashboard' })}>
-                        <Image src="/icons/github.svg" width={15} height={15} alt="github logo" />
-                        Sign in with Github
-                    </Button>
-                </div>
-                <p className='absolute bottom-0 right-0 p-2 text-xs text-white/50'>
-                    Background by <a href='https://www.figma.com/@sael' className='underline'>Ryan Sael</a> licensed under <a href='https://creativecommons.org/licenses/by/4.0/' className='underline'>CC 4.0</a>
-                </p>
+        <div className='h-screen w-full bg-black flex flex-col items-center justify-between p-2'>
+            <div className='w-full'>
+                <NavigationMenu className='w-full grow-0 [&>*]:grow'>
+                    <NavigationMenuList className='w-full justify-end'>
+                        <NavigationMenuItem className='mr-auto'>
+                            <Image
+                                src='/favicon.ico'
+                                width={48}
+                                height={48}
+                                alt='Webhooked Logo'
+                            />
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <Link href='/guide' legacyBehavior passHref>
+                                <NavigationMenuLink className={navigationMenuTriggerStyle()}>Guide</NavigationMenuLink>
+                            </Link>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <Link href='/' legacyBehavior passHref>
+                                <NavigationMenuLink className={navigationMenuTriggerStyle()}>Home</NavigationMenuLink>
+                            </Link>
+                        </NavigationMenuItem>
+                    </NavigationMenuList>
+                </NavigationMenu>
+
+                <Separator />
             </div>
+
+            <div className='w-full h-full max-w-lg max-h-72 p-px rounded-md hover:bg-purple-gradient'>
+                <Card className='w-full h-full rounded-md flex flex-col justify-between'>
+                    <CardHeader>
+                        <CardTitle>Login to Webhooked</CardTitle>
+                        <CardDescription>Awesome webhook features are waiting!</CardDescription>
+                    </CardHeader>
+                    <CardFooter className='flex-col gap-2'>
+                        <Button className="w-full gap-2" onClick={() => signIn('github')}>
+                            <Github /> Sign in with <b>GitHub</b>
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </div>
+
+            {/* Element to place card on center */}
+            <div></div>
         </div>
     );
 };

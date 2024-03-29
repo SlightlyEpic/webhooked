@@ -4,47 +4,71 @@
 
 @layer base {
   :root {
-    /* Name: custom color palette
-        Author: Ilias Ism
-        URL: https://gradient.page */
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
 
-    /* CSS: .bg-gradient { background: var(--gradient) } */
-    --gradient: linear-gradient(to top left,#5271C4,#B19FFF,#ECA1FE);
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
 
-    --background: 238 31.849999999999998% 4.4%;
-    --foreground: 238 4.9% 97.75%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
 
-    --muted: 238 24.5% 16.5%;
-    --muted-foreground: 238 4.9% 55.5%;
+    --primary: 24 9.8% 10%;
+    --primary-foreground: 60 9.1% 97.8%;
 
-    --popover: 238 55.2% 7.15%;
-    --popover-foreground: 238 4.9% 97.75%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
 
-    --card: 238 55.2% 7.15%;
-    --card-foreground: 238 4.9% 97.75%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
 
-    --border: 238 24.5% 16.5%;
-    --input: 238 24.5% 16.5%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
 
-    --primary: 238 49% 55%;
-    --primary-foreground: 238 4.9% 5.5%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
 
-    --secondary: 238 24.5% 16.5%;
-    --secondary-foreground: 238 4.9% 97.75%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 20 14.3% 4.1%;
 
-    --accent: 238 24.5% 16.5%;
-    --accent-foreground: 238 4.9% 97.75%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+
+    --primary: 60 9.1% 97.8%;
+    --primary-foreground: 24 9.8% 10%;
+
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 60 9.1% 97.8%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 238 4.9% 97.75%;
+    --destructive-foreground: 60 9.1% 97.8%;
 
-    --ring: 238 49% 55%;
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 24 5.7% 82.9%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border dark;
   }
   body {
     @apply bg-background text-foreground;

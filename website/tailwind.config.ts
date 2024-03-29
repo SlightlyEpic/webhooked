@@ -18,6 +18,9 @@ const config = {
             },
         },
         extend: {
+            backgroundImage: {
+                'purple-gradient': 'linear-gradient(to top left,#5271C4,#B19FFF,#ECA1FE)'
+            },
             colors: {
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',
