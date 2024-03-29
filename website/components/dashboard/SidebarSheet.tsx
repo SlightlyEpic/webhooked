@@ -1,11 +1,38 @@
+'use client';
+
 import Link from 'next/link';
-import { Home, LineChart, Menu, Package, Package2, ShoppingCart, Users } from 'lucide-react';
-import { Badge } from '@/components/shadcn/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card';
+import { Home, Webhook, Cable, FileClock, KeyRound, BookText, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/shadcn/ui/sheet';
 import { Button } from '@/components/shadcn/ui/button';
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
+
+const sidebarLinks = [
+    {
+        href: '/dashboard',
+        icon: Home,
+        text: 'Dashboard',
+    },
+    {
+        href: '/webhooks',
+        icon: Cable,
+        text: 'Webhooks',
+    },
+    {
+        href: '/logs',
+        icon: FileClock,
+        text: 'Logs',
+    },
+    {
+        href: '/authentication',
+        icon: KeyRound,
+        text: 'Authentication',
+    },
+];
 
 export function SidebarSheet() {
+    const pathname = usePathname();
+
     return <Sheet>
         <SheetTrigger asChild>
             <Button
@@ -18,68 +45,29 @@ export function SidebarSheet() {
             </Button>
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col">
-            <nav className="grid gap-2 text-lg font-medium">
-                <Link
-                    href="#"
-                    className="flex items-center gap-2 text-lg font-semibold"
+            <nav className="grid gap-2">
+                {sidebarLinks.map(({ href, icon: Icon, text }) => <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                        '-mx-2 flex items-center gap-4 rounded-xl px-3 py-2 text-foreground hover:text-primary transition-all first:mt-4',
+                        pathname === href && 'bg-muted',
+                    )}
                 >
-                    <Package2 className="h-6 w-6" />
-                    <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link
-                    href="#"
-                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                    <Home className="h-5 w-5" />
-                    Dashboard
-                </Link>
-                <Link
-                    href="#"
-                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
-                >
-                    <ShoppingCart className="h-5 w-5" />
-                    Orders
-                    <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                        6
-                    </Badge>
-                </Link>
-                <Link
-                    href="#"
-                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                    <Package className="h-5 w-5" />
-                    Products
-                </Link>
-                <Link
-                    href="#"
-                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                    <Users className="h-5 w-5" />
-                    Customers
-                </Link>
-                <Link
-                    href="#"
-                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                    <LineChart className="h-5 w-5" />
-                    Analytics
-                </Link>
+                    <Icon className="h-4 w-4" />
+                    {text}
+                </Link>)}
             </nav>
             <div className="mt-auto">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Upgrade to Pro</CardTitle>
-                        <CardDescription>
-                            Unlock all features and get unlimited access to our
-                            support team.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Button size="sm" className="w-full">
-                            Upgrade
-                        </Button>
-                    </CardContent>
-                </Card>
+                <Button className='w-full'>
+                    <Link
+                        href='/guide'
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all"
+                    >
+                        <BookText className="h-4 w-4" />
+                        Guide
+                    </Link>
+                </Button>
             </div>
         </SheetContent>
     </Sheet>;
