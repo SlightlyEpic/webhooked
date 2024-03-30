@@ -92,7 +92,10 @@ func (d *DatabaseService) Webhooks(ctx context.Context) ([]models.WebhookInfo, e
 }
 
 func (d *DatabaseService) ActiveWebhooks(ctx context.Context) ([]models.WebhookInfo, error) {
-	filter := bson.D{{Key: "archived", Value: false}}
+	filter := bson.M{
+		"archived": false,
+		"active":   true,
+	}
 	cursor, err := d.webhookCollection.Find(ctx, filter)
 	if err != nil {
 		return nil, err

@@ -156,7 +156,7 @@ func (deps *handlerDependencies) handleChangeEvent(
 			case "insert":
 				hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
 			case "update":
-				if evt.FullDocument.Archived {
+				if !evt.FullDocument.Archived && evt.FullDocument.Active {
 					hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
 				} else {
 					delete(hookLookup, evt.DocumentKey.Id.Hex())
