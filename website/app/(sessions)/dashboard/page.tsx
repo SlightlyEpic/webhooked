@@ -1,10 +1,11 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn/ui/avatar';
+import ProfileBar from '@/components/dashboard/ProfileBar';
 import { Badge } from '@/components/shadcn/ui/badge';
 import { Button } from '@/components/shadcn/ui/button';
 import { Card, CardDescription, CardTitle } from '@/components/shadcn/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/shadcn/ui/resizable';
 import { Separator } from '@/components/shadcn/ui/separator';
 import { Clock2, Ellipsis, Github, Star } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -42,20 +43,7 @@ export default function Page() {
                 <Image priority src='/bg/1.jpeg' alt='background' className='w-full object-cover' fill sizes='100%' />
             </div>
             <div className='w-full lg:px-4'>
-                <div className='flex gap-4 items-center w-full backdrop-blur-lg border-muted border bg-background/70 h-24 rounded-md p-4 lg:-mt-16 z-10'>
-                    <Avatar className='h-16 w-16'>
-                        <AvatarImage src='https://avatars.githubusercontent.com/u/42976178?v=4' alt='avatar' />
-                        <AvatarFallback>AV</AvatarFallback>
-                    </Avatar>
-                    <div className='flex flex-col'>
-                        <div className='text-2xl font-medium font-mono'>Display Name</div>
-                        <div className='font-medium font-mono text-foreground/50'>Username</div>
-                    </div>
-                    <div className='ml-auto hidden sm:flex gap-4'>
-                        <Badge className='items-center'>5 Active</Badge>
-                        <Badge variant='outline'>1 Inactive</Badge>
-                    </div>
-                </div>
+                <ProfileBar />
             </div>
             <ResizablePanelGroup direction='horizontal' className='gap-4' style={{ overflow: 'visible' }}>
                 <ResizablePanel className='hidden lg:flex @container' defaultSize={50}>

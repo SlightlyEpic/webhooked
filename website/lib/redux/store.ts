@@ -1,8 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
+import logReducer from './features/log/logSlice';
 
 export const makeStore = () => {
     return configureStore({
-        reducer: {},
+        reducer: {
+            log: logReducer
+        },
     });
 };
 
