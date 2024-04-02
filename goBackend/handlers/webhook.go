@@ -135,6 +135,7 @@ func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.Handler
 			record := models.WebhookLogEntry{
 				Id:                 timeRecieved,
 				WebhookId:          hookObjId,
+				OwnerId:            lookup.ownerId,
 				SenderIp:           ginCtx.Request.RemoteAddr,
 				SuccessfulForwards: succCount,
 				Data:               data,
@@ -161,20 +162,54 @@ func (deps *handlerDependencies) handleChangeEvent(
 
 			switch evt.OperationType {
 			case "insert":
+				deps.logger.Info(
+					"WebhookInfo change event",
+					"type", "insert",
+					"id", evt.FullDocument.OwnerId.String(),
+				)
 				hookLookup[evt.FullDocument.Id.Hex()] = hookLookupValue{
 					ownerId:  evt.FullDocument.OwnerId,
 					destUrls: evt.FullDocument.DestinationUrls,
 				}
 			case "update":
-				if !evt.FullDocument.Archived && evt.FullDocument.Active {
-					hookLookup[evt.FullDocument.Id.Hex()] = hookLookupValue{
-						ownerId:  evt.FullDocument.OwnerId,
-						destUrls: evt.FullDocument.DestinationUrls,
-					}
-				} else {
+				// ~ This is so messed up
+				archived, archivedOk := evt.UpdatedFields["archived"]
+				active, activeOk := evt.UpdatedFields["active"]
+
+				if (archivedOk && archived.(bool)) || (activeOk && !active.(bool)) {
+					deps.logger.Info(
+						"WebhookInfo change event",
+						"type", "update delete",
+						"id", evt.FullDocument.OwnerId.String(),
+					)
 					delete(hookLookup, evt.DocumentKey.Id.Hex())
+					break
+				}
+
+				// ~ If the state changes from inactive to active
+				// ~ Mongo wont send the destinationUrls in that
+				// ~ change event, so the only possible option left
+				// ~ is to do a find and then update the map
+				// ~ Insanely tedious, there must be a better way.
+				// ~ btw thats not done yet, we just ignore the problem.
+
+				ownerId, ownerIdOk := evt.UpdatedFields["ownerId"]
+				dest, destOk := evt.UpdatedFields["dest"]
+				lookup, ok := hookLookup[evt.DocumentKey.Id.Hex()]
+
+				if ownerIdOk && ok {
+					lookup.ownerId = ownerId.(primitive.ObjectID)
+				}
+
+				if destOk && ok {
+					lookup.destUrls = dest.([]string)
 				}
 			case "delete":
+				deps.logger.Info(
+					"WebhookInfo change event",
+					"type", "delete",
+					"id", evt.FullDocument.OwnerId.String(),
+				)
 				delete(hookLookup, evt.DocumentKey.Id.Hex())
 			}
 

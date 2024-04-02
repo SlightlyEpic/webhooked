@@ -10,11 +10,17 @@ import (
 )
 
 type DocumentChangeEvent[T any] struct {
-	Id            map[string]string   `bson:"_id"`
-	ClusterTime   primitive.Timestamp `bson:"clusterTime"`
-	FullDocument  T                   `bson:"fullDocument"`
-	Ns            map[string]string   `bson:"ns"`
-	OperationType string              `bson:"operationType"`
+	Id          map[string]string   `bson:"_id"`
+	ClusterTime primitive.Timestamp `bson:"clusterTime"`
+
+	// Only available if OperationType is "insert" or "delete"
+	FullDocument T `bson:"fullDocument,omitempty"`
+
+	// Only available if OperationType is "update"
+	UpdatedFields map[string]interface{} `bson:"_updatedFields,omitempty"`
+
+	Ns            map[string]string `bson:"ns"`
+	OperationType string            `bson:"operationType"`
 	DocumentKey   struct {
 		Id primitive.ObjectID `bson:"_id"`
 	} `bson:"documentKey"`

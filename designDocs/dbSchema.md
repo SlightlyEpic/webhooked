@@ -11,7 +11,7 @@ type WebhookInfo = {
     name: string                // A user assigned human readable name, need not be unique, just used for filtering
     destinationUrls: string[]   // Array of URLs to which the webhook will be forwarded to
     log: WebhookLogEntry._id[]  // An array of _ids of log entries which correspond to this webhook
-    ownerId: User._id             // The _id of the owner of this webhook
+    ownerId: User._id           // The _id of the owner of this webhook
     active: boolean             // Let the user deactivate the webhook without deleting it
     archived: boolean           // Deleted webhooks get archived, because the logs might still reference the document
     created: Date               // Timestamp this webhook was created at

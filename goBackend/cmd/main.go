@@ -41,7 +41,7 @@ func run(ctx context.Context, logStream io.Writer, args []string, getenv func(st
 	}
 
 	// Wait 3 seconds to let all other services clean up
-	<-time.After(3 * time.Second)
+	<-time.After(time.Second)
 
 	return nil
 }
