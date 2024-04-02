@@ -17,7 +17,10 @@ import (
 )
 
 type webhookInfoChangeEvent = services.DocumentChangeEvent[models.WebhookInfo]
-type idDestUrlsMap = map[string]([]string)
+type hookLookupValue struct {
+	ownerId  primitive.ObjectID
+	destUrls []string
+}
 
 func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.HandlerFunc {
 	hooks, err := deps.Db.ActiveWebhooks(ctx)
@@ -27,11 +30,14 @@ func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.Handler
 
 	// Maps Id -> []destUrls
 	lookupRWMutex := sync.RWMutex{}
-	hookLookup := make(idDestUrlsMap)
+	hookLookup := make(map[string]hookLookupValue)
 
 	// ~ Add existing hooks to lookup
 	for _, hook := range hooks {
-		hookLookup[hook.Id.Hex()] = hook.DestinationUrls
+		hookLookup[hook.Id.Hex()] = hookLookupValue{
+			ownerId:  hook.OwnerId,
+			destUrls: hook.DestinationUrls,
+		}
 	}
 
 	// ~ Respond to changes in db
@@ -46,7 +52,8 @@ func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.Handler
 	return func(ctx *gin.Context) {
 		hookId := ctx.Param("webhookId")
 		lookupRWMutex.RLock()
-		destUrls, ok := hookLookup[hookId]
+		lookup, ok := hookLookup[hookId]
+		destUrls := lookup.destUrls
 		lookupRWMutex.RUnlock()
 
 		if !ok {
@@ -141,7 +148,7 @@ func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.Handler
 func (deps *handlerDependencies) handleChangeEvent(
 	ctx context.Context,
 	watcher <-chan webhookInfoChangeEvent,
-	hookLookup idDestUrlsMap,
+	hookLookup map[string]hookLookupValue,
 	lookupRWMutex *sync.RWMutex,
 ) {
 	for {
@@ -154,10 +161,16 @@ func (deps *handlerDependencies) handleChangeEvent(
 
 			switch evt.OperationType {
 			case "insert":
-				hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
+				hookLookup[evt.FullDocument.Id.Hex()] = hookLookupValue{
+					ownerId:  evt.FullDocument.OwnerId,
+					destUrls: evt.FullDocument.DestinationUrls,
+				}
 			case "update":
 				if !evt.FullDocument.Archived && evt.FullDocument.Active {
-					hookLookup[evt.FullDocument.Id.Hex()] = evt.FullDocument.DestinationUrls
+					hookLookup[evt.FullDocument.Id.Hex()] = hookLookupValue{
+						ownerId:  evt.FullDocument.OwnerId,
+						destUrls: evt.FullDocument.DestinationUrls,
+					}
 				} else {
 					delete(hookLookup, evt.DocumentKey.Id.Hex())
 				}

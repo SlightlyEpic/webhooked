@@ -11,7 +11,7 @@ type WebhookInfo struct {
 	Name            string             `bson:"name"`
 	DestinationUrls []string           `bson:"destinationUrls"`
 	Log             []time.Time        `bson:"log"`
-	Owner           primitive.ObjectID `bson:"owner"`
+	OwnerId         primitive.ObjectID `bson:"ownerId"`
 	Active          bool               `bson:"active"`
 	Archived        bool               `bson:"boolean"`
 	Created         time.Time          `bson:"created"`

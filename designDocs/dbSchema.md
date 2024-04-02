@@ -11,7 +11,7 @@ type WebhookInfo = {
     name: string                // A user assigned human readable name, need not be unique, just used for filtering
     destinationUrls: string[]   // Array of URLs to which the webhook will be forwarded to
     log: WebhookLogEntry._id[]  // An array of _ids of log entries which correspond to this webhook
-    owner: User._id             // The _id of the owner of this webhook
+    ownerId: User._id             // The _id of the owner of this webhook
     active: boolean             // Let the user deactivate the webhook without deleting it
     archived: boolean           // Deleted webhooks get archived, because the logs might still reference the document
     created: Date               // Timestamp this webhook was created at
@@ -45,6 +45,7 @@ type WebhookLogEntry = {
     _id: Date                   // Time this webhook was recieved, this is the cluster and TTL key
     webhookId: WebhookInfo._id  // The _id of the webhook
     senderIp: string            // The IP address of the sender
+    ownerId: User._id           // The _id of the webhook's owner
     data: unknown               // The JSON data recieved
     successfulForwards: number  // Number of WebhookInfo.destinationUrls the data was successfully recieved by at the time of being recieved by the server
 }
