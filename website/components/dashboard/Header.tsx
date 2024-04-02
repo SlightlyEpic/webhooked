@@ -3,6 +3,7 @@ import { SidebarSheet } from '@/components/dashboard/SidebarSheet';
 import { Input } from '@/components/shadcn/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/shadcn/ui/dropdown-menu';
 import { Button } from '@/components/shadcn/ui/button';
+import Link from 'next/link';
 
 export default function Header() {
     return <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
@@ -30,9 +31,11 @@ export default function Header() {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>
-                    <div className='text-rose-500 font-medium'>Logout</div>
-                </DropdownMenuItem>
+                <Link href='/api/v1/auth/signout'>
+                    <DropdownMenuItem>
+                        <div className='text-rose-500 font-medium'>Logout</div>
+                    </DropdownMenuItem>
+                </Link>
             </DropdownMenuContent>
         </DropdownMenu>
     </header>;
