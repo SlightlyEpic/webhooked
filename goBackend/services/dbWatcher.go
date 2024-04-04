@@ -7,6 +7,7 @@ import (
 	"github.com/SlightlyEpic/webhooked/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DocumentChangeEvent[T any] struct {
@@ -28,7 +29,7 @@ type DocumentChangeEvent[T any] struct {
 
 // To watch and relay any changes in WebhookInfo collection
 func watchWebhookStream(ctx context.Context, serv *DatabaseService) {
-	webhookStream, err := serv.webhookCollection.Watch(ctx, mongo.Pipeline{})
+	webhookStream, err := serv.webhookCollection.Watch(ctx, mongo.Pipeline{}, options.ChangeStream().SetFullDocument(options.UpdateLookup))
 	defer func() {
 		err := webhookStream.Close(ctx)
 		if err != nil {

@@ -113,7 +113,9 @@ func (deps *handlerDependencies) WebhookHandler(ctx context.Context) gin.Handler
 					}
 
 					resp.Body.Close()
-					successCounter.Add(1)
+					if 200 <= resp.StatusCode && resp.StatusCode <= 299 {
+						successCounter.Add(1)
+					}
 				}()
 			}
 
@@ -172,37 +174,13 @@ func (deps *handlerDependencies) handleChangeEvent(
 					destUrls: evt.FullDocument.DestinationUrls,
 				}
 			case "update":
-				// ~ This is so messed up
-				archived, archivedOk := evt.UpdatedFields["archived"]
-				active, activeOk := evt.UpdatedFields["active"]
-
-				if (archivedOk && archived.(bool)) || (activeOk && !active.(bool)) {
-					deps.logger.Info(
-						"WebhookInfo change event",
-						"type", "update delete",
-						"id", evt.FullDocument.OwnerId.String(),
-					)
+				if !evt.FullDocument.Archived && evt.FullDocument.Active {
+					hookLookup[evt.FullDocument.Id.Hex()] = hookLookupValue{
+						ownerId:  evt.FullDocument.OwnerId,
+						destUrls: evt.FullDocument.DestinationUrls,
+					}
+				} else {
 					delete(hookLookup, evt.DocumentKey.Id.Hex())
-					break
-				}
-
-				// ~ If the state changes from inactive to active
-				// ~ Mongo wont send the destinationUrls in that
-				// ~ change event, so the only possible option left
-				// ~ is to do a find and then update the map
-				// ~ Insanely tedious, there must be a better way.
-				// ~ btw thats not done yet, we just ignore the problem.
-
-				ownerId, ownerIdOk := evt.UpdatedFields["ownerId"]
-				dest, destOk := evt.UpdatedFields["dest"]
-				lookup, ok := hookLookup[evt.DocumentKey.Id.Hex()]
-
-				if ownerIdOk && ok {
-					lookup.ownerId = ownerId.(primitive.ObjectID)
-				}
-
-				if destOk && ok {
-					lookup.destUrls = dest.([]string)
 				}
 			case "delete":
 				deps.logger.Info(
