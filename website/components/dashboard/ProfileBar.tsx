@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 
 export default function ProfileBar() {
     const { data: session } = useSession();
-    const user = session!.user;
+    const user = session?.user;
     const profile = useMemo((): GithubProfile | null => user ? JSON.parse(user.name!) : null, [user]);
 
     if(!user) return <></>;

@@ -110,10 +110,10 @@
   }
 
   html {
-    @apply min-h-screen
+    @apply min-h-screen h-full
   }
 
   body {
-    @apply bg-background text-foreground min-h-screen h-full;
+    @apply bg-background text-foreground min-h-screen h-full flex;
   }
 }

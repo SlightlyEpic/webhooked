@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
         const logCollection = db.collection(process.env.MONGODB_COLLECTION_LOGS);
         const logs = await logCollection.find({
             ownerId: userDoc._id
-        }).sort({ _id: -1 }).skip(page * 100).limit(100).toArray();
+        }).sort({ _id: -1 }).skip(page * 25).limit(25).toArray();
         
         return NextResponse.json({
             page,

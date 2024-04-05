@@ -7,9 +7,9 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="relative grid min-h-screen h-full w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] scroll-auto">
+        <div className="relative grid min-h-screen w-full h-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] scroll-auto">
             <Sidebar />
-            <div className="flex flex-col grow">
+            <div className="flex flex-col grow-0 h-full">
                 <Header />
                 {children}
             </div>

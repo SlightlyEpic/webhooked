@@ -6,7 +6,7 @@ import { Button } from '@/components/shadcn/ui/button';
 import Link from 'next/link';
 
 export default function Header() {
-    return <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+    return <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 shrink-0">
         <SidebarSheet />
         <div className="w-full flex-1">
             <form>
