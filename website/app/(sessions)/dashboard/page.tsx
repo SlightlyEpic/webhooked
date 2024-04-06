@@ -8,6 +8,8 @@ import { Separator } from '@/components/shadcn/ui/separator';
 import { Clock2, Ellipsis, Github, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Suspense } from 'react';
+import { RecentLogs } from './RecentLogs';
 
 const sampleWebhookData = [
     {
@@ -60,7 +62,10 @@ export default function Page() {
                             </CardTitle>
                         </Card>
 
-                        {[0, 1, 2, 3, 4, 5].map(v => <LogSkeleton key={v} />)}
+                        <Suspense fallback={[0, 1, 2, 3, 4, 5].map(v => <LogSkeleton key={v} />)}>
+                            <RecentLogs />
+                        </Suspense>
+                        
                     </div>
                 </ResizablePanel>
                 <ResizableHandle withHandle className='hidden lg:flex' />

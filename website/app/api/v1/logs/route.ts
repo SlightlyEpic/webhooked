@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongo/client';
 import { auth } from '@/lib/auth';
 import { GithubProfile } from 'next-auth/providers/github';
-import { User } from '@/models/User';
+import { getLogPageByName } from '@/controllers/getLogPageByName';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,24 +23,7 @@ export async function GET(req: NextRequest) {
     if(isNaN(page)) page = 0;
 
     try {
-        const db = (await clientPromise).db(process.env.MONGODB_DATBASE);
-        const userCollection = db.collection(process.env.MONGODB_COLLECTION_USERS);
-        const userDoc = await userCollection.findOne<User>({
-            username: profile.login
-        });
-        
-        if(!userDoc) {
-            return NextResponse.json({
-                error: 'User not found.'
-            }, {
-                status: 400
-            });
-        }
-
-        const logCollection = db.collection(process.env.MONGODB_COLLECTION_LOGS);
-        const logs = await logCollection.find({
-            ownerId: userDoc._id
-        }).sort({ _id: -1 }).skip(page * 25).limit(25).toArray();
+        const logs = getLogPageByName(profile.login, page);
         
         return NextResponse.json({
             page,

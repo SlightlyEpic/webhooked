@@ -1,17 +1,10 @@
-'use client';
-
-import { useSession } from 'next-auth/react';
 import { Avatar, AvatarImage, AvatarFallback } from '../shadcn/ui/avatar';
 import { Badge } from '../shadcn/ui/badge';
-import { type GithubProfile } from 'next-auth/providers/github';
-import { useMemo } from 'react';
+import { getServerSessionProfile } from '@/lib/nextauth/getSessionProfile';
 
-export default function ProfileBar() {
-    const { data: session } = useSession();
-    const user = session?.user;
-    const profile = useMemo((): GithubProfile | null => user ? JSON.parse(user.name!) : null, [user]);
-
-    if(!user) return <></>;
+export default async function ProfileBar() {
+    const [session, profile] = await getServerSessionProfile();
+    if(!session) return <></>;
     if(!profile) return <></>;
 
     const avatarFallback = profile.login ? profile.login.split(' ').map(v => v[0].toUpperCase()).slice(0, 2).join() : '?';
