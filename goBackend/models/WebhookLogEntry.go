@@ -12,5 +12,5 @@ type WebhookLogEntry struct {
 	OwnerId            primitive.ObjectID     `bson:"ownerId"`
 	SenderIp           string                 `bson:"senderIp"`
 	Data               map[string]interface{} `bson:"data"`
-	SuccessfulForwards int                    `bson:"SuccessfulForwards"`
+	SuccessfulForwards int                    `bson:"successfulForwards"`
 }
