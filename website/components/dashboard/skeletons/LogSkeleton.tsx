@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/shadcn/ui/skeleton';
 
 export function LogSkeleton() {
     return (
-        <Card>
+        <Card className='w-full'>
             <CardHeader>
                 <div className='w-full h-2 flex justify-between'>
                     <Skeleton className='w-1/2 max-w-xs rounded-full' />
