@@ -5,12 +5,12 @@ import clientPromise from '@/lib/mongo/client';
 export async function getActiveWebhooks(username: string): Promise<WebhookInfo[]> {
     const db = (await clientPromise).db(process.env.MONGODB_DATBASE);
     
-    const userCollection = db.collection(process.env.MONGODB_COLLECTION_WEBHOOK);
-    const userDoc = await userCollection.findOne<User>({ username });
+    const userCollection = db.collection<User>(process.env.MONGODB_COLLECTION_USERS);
+    const userDoc = await userCollection.findOne({ username });
     if(!userDoc) throw 'User not found';
 
-    const webhooksCollection = db.collection(process.env.MONGODB_COLLECTION_WEBHOOK);
-    const webhooks = await webhooksCollection.find<WebhookInfo>({
+    const webhooksCollection = db.collection<WebhookInfo>(process.env.MONGODB_COLLECTION_WEBHOOK);
+    const webhooks = await webhooksCollection.find({
         ownerId: userDoc._id,
         active: true,
         archived: false
