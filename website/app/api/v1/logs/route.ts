@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { GithubProfile } from 'next-auth/providers/github';
-import { getLogPageByName } from '@/controllers/getLogPageByName';
+import { getLogPageByName } from '@/lib/mongo/getLogPageByName';
 
 export const dynamic = 'force-dynamic';
 

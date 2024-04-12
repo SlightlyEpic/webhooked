@@ -1,6 +1,6 @@
 import { Button } from '@/components/shadcn/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/shadcn/ui/card';
-import { getLogPageByName } from '@/controllers/getLogPageByName';
+import { getLogPageByName } from '@/lib/mongo/getLogPageByName';
 import { getServerSessionProfile } from '@/lib/nextauth/getSessionProfile';
 import { jsonToTruncString } from '@/lib/string/prettyJson';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuShortcut, ContextMenuTrigger } from '@/components/shadcn/ui/context-menu';
