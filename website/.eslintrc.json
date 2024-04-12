@@ -1,6 +1,6 @@
 {
   "extends": "next/core-web-vitals",
-  "ignorePatterns": [".next/**/*"],
+  "ignorePatterns": [".next/**/*", "components/shadcn/*"],
   "rules": {
     "indent": ["error", 4],
     "semi": ["error", "always"],

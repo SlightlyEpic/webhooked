@@ -1,15 +1,15 @@
 'use client';
 
+import { GetLogsErrorResponse, GetLogsSuccessResponse } from '@/app/api/v1/logs/route';
 import type { GetWebhooksSuccessResponse, GetWebhooksErrorResponse } from '@/app/api/v1/webhooks/route';
 import { DatePicker } from '@/components/dashboard/DatePicker';
 import { LogSkeleton } from '@/components/dashboard/skeletons/LogSkeleton';
-import { Alert, AlertDescription } from '@/components/shadcn/ui/alert';
 import { Button } from '@/components/shadcn/ui/button';
 import { Card } from '@/components/shadcn/ui/card';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/ui/select';
 import { Tooltip } from '@/components/shadcn/ui/tooltip';
 import { TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/shadcn/ui/tooltip';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { ListRestart } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -19,17 +19,41 @@ export default function LogsPage() {
     const [webhookId, setWebhookId] = useState<string>();
     const [loading, setLoading] = useState(true);
 
-    const webhooksQuery = useQuery<GetWebhooksSuccessResponse>({
-        queryKey: ['webhooks', 'all'],
-        queryFn: async () => {
+    const logsQuery = useInfiniteQuery<GetLogsSuccessResponse>({
+        queryKey: ['logs', {
+            from: fromDate,
+            to: toDate,
+            webhookId: webhookId
+        }],
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages, lastPageParam) => lastPage.data.length === 0 ? undefined : lastPageParam as number + 1,
+        getPreviousPageParam: (firstPage, allPages, firstPageParam) => firstPageParam as number <= 0 ? undefined : firstPageParam as number - 1,
+        queryFn: async ({ pageParam }) => {
+            const page = pageParam as number;
+            
             const params = new URLSearchParams();
+            params.append('page', page.toString());
             if(fromDate) params.append('from', fromDate.getTime().toString());
             if(toDate) params.append('to', toDate.getTime().toString());
             if(webhookId) params.append('webhookId', webhookId);
 
             const paramsString = params.toString();
 
-            const res = await fetch(`/api/v1/webhooks${paramsString ? '?' : ''}${paramsString}`);
+            const res = await fetch(`/api/v1/logs${paramsString ? '?' : ''}${paramsString}`);
+            if(!res.ok) throw res.statusText;
+            const json = await res.json() as (GetLogsSuccessResponse | GetLogsErrorResponse);
+            if('error' in json) throw json.error;
+
+            return json;
+        },
+        // Logs are never considered stale. If new logs are added, the user can use the refresh logs button.
+        staleTime: 1000000000
+    });
+
+    const webhooksQuery = useQuery<GetWebhooksSuccessResponse>({
+        queryKey: ['webhooks', 'all'],
+        queryFn: async () => {
+            const res = await fetch('/api/v1/webhooks');
             if(!res.ok) throw res.statusText;
             const json = await res.json() as (GetWebhooksSuccessResponse | GetWebhooksErrorResponse);
             if('error' in json) throw json.error;
@@ -84,7 +108,7 @@ export default function LogsPage() {
             </Card>
 
             {loading && new Array(4).fill(0).map((v, i) => <LogSkeleton key={i} />)}
-            {!loading && null}
+            {!logsQuery.isSuccess && logsQuery.data && null}
         </main>
     );
 }
