@@ -117,3 +117,13 @@
     @apply bg-background text-foreground min-h-screen h-full flex;
   }
 }
+
+@layer utilities {
+  .animation-delay-1\/6 {
+      animation-delay: 166ms;
+  }
+
+  .animation-delay-2\/6 {
+      animation-delay: 333ms;
+  }
+}

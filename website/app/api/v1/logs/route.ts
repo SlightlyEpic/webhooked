@@ -24,7 +24,7 @@ type RouteParams = {
 
 export type GetLogsSuccessResponse = {
     page: number
-    data: MakeStringType<WebhookLogEntry, 'webhookId' | 'ownerId'>[]
+    data: MakeStringType<WebhookLogEntry, '_id' | 'webhookId' | 'ownerId'>[]
 };
 
 export type GetLogsErrorResponse = {
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
         });
     }
 
-    const params = req.nextUrl.searchParams as RouteParams;
+    const params = Object.fromEntries(req.nextUrl.searchParams) as RouteParams;
 
     const options: GetLogPageByNameOptions = {};
     options.page = params.page ? parseInt(params.page) : 0;
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     if(params.webhookId) options.webhookId = params.webhookId;
 
     try {
-        const logs = getLogPageByName(profile.login, options);
+        const logs = await getLogPageByName(profile.login, options);
         
         return NextResponse.json({
             page: options.page,

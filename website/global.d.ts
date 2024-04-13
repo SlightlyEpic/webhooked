@@ -1,6 +1,7 @@
 declare namespace NodeJS {
     interface ProcessEnv {
         NODE_ENV: string
+        ORIGIN: string
         GITHUB_CLIENT_ID: string
         GITHUB_CLIENT_SECRET: string
         NEXTAUTH_URL: string

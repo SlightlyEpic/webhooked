@@ -9,15 +9,30 @@ import { Card } from '@/components/shadcn/ui/card';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/ui/select';
 import { Tooltip } from '@/components/shadcn/ui/tooltip';
 import { TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/shadcn/ui/tooltip';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ListRestart } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { LogList } from './LogList';
+
+// ! BUG: The calendar sets dates assuming ISO, but dates are displayed as UTC so it *seems* to be wrong
+// ! should somehow make Calendar set dates in UTC
 
 export default function LogsPage() {
+    const queryClient = useQueryClient();
     const [fromDate, setFromDate] = useState<Date>();
     const [toDate, setToDate] = useState<Date>();
     const [webhookId, setWebhookId] = useState<string>();
     const [loading, setLoading] = useState(true);
+
+    const refetchCurrent = useCallback(() => {
+        queryClient.invalidateQueries({
+            queryKey: ['logs', {
+                from: fromDate,
+                to: toDate,
+                webhookId: webhookId
+            }]
+        });
+    }, [queryClient, fromDate, toDate, webhookId]);
 
     const logsQuery = useInfiniteQuery<GetLogsSuccessResponse>({
         queryKey: ['logs', {
@@ -33,8 +48,8 @@ export default function LogsPage() {
             
             const params = new URLSearchParams();
             params.append('page', page.toString());
-            if(fromDate) params.append('from', fromDate.getTime().toString());
-            if(toDate) params.append('to', toDate.getTime().toString());
+            if(fromDate) params.append('after', fromDate.getTime().toString());
+            if(toDate) params.append('before', toDate.getTime().toString());
             if(webhookId) params.append('webhookId', webhookId);
 
             const paramsString = params.toString();
@@ -96,7 +111,7 @@ export default function LogsPage() {
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button className='ml-auto gap-2' variant='ghost'>
+                            <Button className='ml-auto gap-2' variant='ghost' onClick={refetchCurrent}>
                                 <ListRestart />
                             </Button>
                         </TooltipTrigger>
@@ -107,8 +122,8 @@ export default function LogsPage() {
                 </TooltipProvider>
             </Card>
 
-            {loading && new Array(4).fill(0).map((v, i) => <LogSkeleton key={i} />)}
-            {!logsQuery.isSuccess && logsQuery.data && null}
+            {logsQuery.isFetching && !logsQuery.isFetchingNextPage && new Array(4).fill(0).map((v, i) => <LogSkeleton key={i} />)}
+            {(!logsQuery.isFetching || logsQuery.isFetchingNextPage) && logsQuery.isSuccess && logsQuery.data && <LogList query={logsQuery} />}
         </main>
     );
 }
