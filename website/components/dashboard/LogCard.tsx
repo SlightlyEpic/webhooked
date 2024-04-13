@@ -1,4 +1,3 @@
-import { jsonToTruncString } from '@/lib/string/prettyJson';
 import { Card, CardContent, CardHeader } from '@/components/shadcn/ui/card';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuShortcut, ContextMenuTrigger } from '@/components/shadcn/ui/context-menu';
 import { WebhookLogEntry } from '@/models/WebhookLogEntry';
@@ -11,6 +10,7 @@ export type LogCardProps = {
 
 export function LogCard({ log }: LogCardProps) {
     const date = useMemo(() => new Date(log._id), [log._id]);
+    const json = useMemo(() => JSON.stringify(log.data, null, 2), [log.data]);
 
     return (
         <ContextMenu key={log._id}>
@@ -33,9 +33,10 @@ export function LogCard({ log }: LogCardProps) {
                                 <div className='font-bold'>Forwarded to:</div>
                                 <div>{`${log.successfulForwards} URLs`}</div>
                             </div>
-                            <div className='flex gap-2 items-center'>
+                            <div className='flex gap-2 items-start'>
                                 <div className='font-bold'>Data:</div>
-                                <div className='flex gap-2'>{jsonToTruncString(log.data as { [key: string]: unknown })}</div>
+                                {/* <div className='flex gap-2'>{jsonToTruncString(log.data as { [key: string]: unknown })}</div> */}
+                                <div className='flex gap-2 whitespace-pre'>{json}</div>
                             </div>
                         </div>
                     </CardContent>
