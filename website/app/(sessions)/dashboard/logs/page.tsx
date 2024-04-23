@@ -22,7 +22,6 @@ export default function LogsPage() {
     const [fromDate, setFromDate] = useState<Date>();
     const [toDate, setToDate] = useState<Date>();
     const [webhookId, setWebhookId] = useState<string>();
-    const [loading, setLoading] = useState(true);
 
     const refetchCurrent = useCallback(() => {
         queryClient.invalidateQueries({
