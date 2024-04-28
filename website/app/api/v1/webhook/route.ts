@@ -1,6 +1,8 @@
 import { auth } from '@/lib/auth';
 import { createWebhook } from '@/lib/mongo/createWebhook';
-import { webhookInfoSchema, WebhookInfo } from '@/models/WebhookInfo';
+import { getUserByName } from '@/lib/mongo/getUserByName';
+import { getServerSessionProfile } from '@/lib/nextauth/getSessionProfile';
+import { WebhookInfo, newWebhookInfoSchema } from '@/models/WebhookInfo';
 import { ObjectId, WithoutId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -15,8 +17,8 @@ export type PostWebhookErrorResponse = {
 };
 
 export async function POST(req: NextRequest) {
-    const session = await auth();
-    if(!session || !session.user) {
+    const [session, profile] = await getServerSessionProfile();
+    if(!session || !session.user || !profile) {
         return NextResponse.json({
             error: 'Not signed in.'
         }, {
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json() as unknown;
-    const parseResult = webhookInfoSchema.safeParse(body);
+    const parseResult = newWebhookInfoSchema.safeParse(body);
 
     if(!parseResult.success) {
         return NextResponse.json({
@@ -35,12 +37,17 @@ export async function POST(req: NextRequest) {
         });
     }
 
-    const webhookData: WithoutId<WebhookInfo> = {
-        ...parseResult.data,
-        owner: new ObjectId(parseResult.data.owner)
-    };
-
     try {
+        const owner = await getUserByName(profile.login);
+    
+        const webhookData: WithoutId<WebhookInfo> = {
+            ...parseResult.data,
+            ownerId: owner._id,
+            active: true,
+            archived: false,
+            created: new Date()
+        };
+
         const webhookId = await createWebhook(webhookData);
 
         return NextResponse.json({

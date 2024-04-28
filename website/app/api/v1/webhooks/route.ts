@@ -8,7 +8,7 @@ import { type MakeStringType } from '@/lib/util/types';
 export const dynamic = 'force-dynamic';
 
 export type GetWebhooksSuccessResponse = {
-    data: MakeStringType<WebhookInfo, '_id' | 'owner'>[]
+    data: MakeStringType<WebhookInfo, '_id' | 'ownerId' | 'created'>[]
 };
 
 export type GetWebhooksErrorResponse = {

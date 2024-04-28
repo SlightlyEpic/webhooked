@@ -3,6 +3,7 @@
 import Sidebar from '@/components/dashboard/Sidebar';
 import Header from '@/components/dashboard/Header';
 import ReactQueryProvider from '@/components/ReactQueryProvider';
+import { Toaster } from '@/components/shadcn/ui/sonner';
 
 export default function RootLayout({
     children,
@@ -16,6 +17,7 @@ export default function RootLayout({
                 <div className="flex flex-col grow-0 h-screen max-h-screen">
                     <Header />
                     {children}
+                    <Toaster />
                 </div>
             </div>
         </ReactQueryProvider>
