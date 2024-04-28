@@ -48,10 +48,12 @@ export default function AuthenticationInfoPage() {
                                 {!isViewing && <Eye onClick={() => setIsViewing(true)} className='h-6 w-6 text-muted-foreground hover:text-foreground' />}
                                 <Copy className='h-6 w-6 text-muted-foreground hover:text-foreground' role='button' onClick={tryCopy} />
                             </div>
-                            <div className='font-bold'>Registered at:</div>
-                            <div className='font-mono flex gap-4 items-center'>
-                                <Input className='w-96' value={userQuery.data!.registeredAt} readOnly />
-                            </div>
+
+                            <div className='font-bold'>Registered:</div>
+                            <Input className='w-96' value={userQuery.data!.registeredAt} readOnly />
+                            
+                            <div className='font-bold'>Last sign in:</div>
+                            <Input className='w-96' value={userQuery.data!.lastSignIn} readOnly />
                         </CardContent>
                     </Card>
                 )
