@@ -9,6 +9,7 @@ export type User = {
     lastSignIn: Date
     webhooks: ObjectId[]
     deletedWebhooks: ObjectId[]
+    apiKey: string
 };
 
 export const userSchema = z.object({
