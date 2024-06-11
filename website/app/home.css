@@ -1,0 +1,11 @@
+@tailwind utilities;
+
+@layer utilities {
+    .text-glow {
+        text-shadow: 0 0 0.05em #FFF;
+    }
+
+    .button-glow {
+        filter: drop-shadow(0 0 0.5rem skyblue);;
+    }
+}

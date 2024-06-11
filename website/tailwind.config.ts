@@ -1,5 +1,21 @@
 import type { Config } from 'tailwindcss';
 
+import defaultTheme from 'tailwindcss/defaultTheme';
+import colors from 'tailwindcss/colors';
+// @ts-expect-error no declarations
+import flattenColorPalette from 'tailwindcss/lib/util/flattenColorPalette';
+
+function addVariablesForColors({ addBase, theme }: any) {
+    let allColors = flattenColorPalette(theme('colors'));
+    let newVars = Object.fromEntries(
+        Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+    );
+
+    addBase({
+        ':root': newVars,
+    });
+}
+
 const config = {
     darkMode: ['class'],
     content: [
@@ -82,7 +98,12 @@ const config = {
             },
         },
     },
-    plugins: [require('tailwindcss-animate'), require('@tailwindcss/container-queries')],
+    plugins: [
+        require('tailwindcss-animate'),
+        require('@tailwindcss/container-queries'),
+        addVariablesForColors,
+
+    ],
 } satisfies Config;
 
 export default config;
