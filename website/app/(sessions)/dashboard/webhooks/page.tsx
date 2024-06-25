@@ -14,7 +14,6 @@ import { useState } from 'react';
 import { Button } from '@/components/shadcn/ui/button';
 import { Input } from '@/components/shadcn/ui/input';
 import NewWebhookInput, { type NewWebhookPartial } from '@/components/dashboard/NewWebhookInput';
-// @ts-expect-error types are not available
 import { toast } from 'sonner';
 
 const fetchWebhooks = async () => {
