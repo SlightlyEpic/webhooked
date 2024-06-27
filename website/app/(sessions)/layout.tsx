@@ -6,7 +6,7 @@ export default async function RootLayout({ children }: Readonly<{children: React
     const session = await getServerSession();
 
     return (
-        <SessionProvider session={session} basePath='/api/v1/auth'>
+        <SessionProvider session={session}>
             <StoreProvider>
                 {children}
             </StoreProvider>

@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader } from '@/components/shadcn/ui/card';
 import { jsonToTruncString } from '@/lib/string/prettyJson';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuShortcut, ContextMenuTrigger } from '@/components/shadcn/ui/context-menu';
 import Link from 'next/link';
-import { GetLogsErrorResponse, GetLogsSuccessResponse } from '@/app/api/v1/logs/route';
+import { GetLogsErrorResponse, GetLogsSuccessResponse } from '@/app/api/logs/route';
 import { useQuery } from '@tanstack/react-query';
 import { LogSkeleton } from '@/components/dashboard/skeletons/LogSkeleton';
 
 const fetchLogs = async () => {
-    const res = await fetch('/api/v1/logs');
+    const res = await fetch('/api/logs');
     if (!res.ok) throw res.statusText;
     const json = await res.json() as (GetLogsSuccessResponse | GetLogsErrorResponse);
     if ('error' in json) throw json.error;

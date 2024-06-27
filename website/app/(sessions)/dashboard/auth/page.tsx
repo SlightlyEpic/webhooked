@@ -1,6 +1,6 @@
 'use client';
 
-import { GetUserErrorResponse, GetUserSuccessResponse } from '@/app/api/v1/user/route';
+import { GetUserErrorResponse, GetUserSuccessResponse } from '@/app/api/user/route';
 import { LogSkeleton } from '@/components/dashboard/skeletons/LogSkeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn/ui/card';
 import { Input } from '@/components/shadcn/ui/input';
@@ -10,7 +10,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 const fetchUser = async () => {
-    const res = await fetch('/api/v1/user');
+    const res = await fetch('/api/user');
     if (!res.ok) throw res.statusText;
     const json = await res.json() as (GetUserSuccessResponse | GetUserErrorResponse);
     if ('error' in json) throw json.error;

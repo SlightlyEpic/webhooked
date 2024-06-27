@@ -1,4 +1,4 @@
-import { GetLogsSuccessResponse } from '@/app/api/v1/logs/route';
+import { GetLogsSuccessResponse } from '@/app/api/logs/route';
 import { LogCard } from '@/components/dashboard/LogCard';
 import { Button } from '@/components/shadcn/ui/button';
 import { Card } from '@/components/shadcn/ui/card';

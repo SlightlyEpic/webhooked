@@ -1,6 +1,6 @@
 'use client';
 
-import { GetLogErrorResponse, GetLogSuccessResponse } from '@/app/api/v1/log/route';
+import { GetLogErrorResponse, GetLogSuccessResponse } from '@/app/api/log/route';
 import { LogCard } from '@/components/dashboard/LogCard';
 import { LogSkeleton } from '@/components/dashboard/skeletons/LogSkeleton';
 import { useQuery } from '@tanstack/react-query';
@@ -18,7 +18,7 @@ export default function OneLogPage({ params }: PageProps) {
             const searchParams = new URLSearchParams();
             searchParams.append('logId', params.logId);
 
-            const res = await fetch('/api/v1/log?' + searchParams);
+            const res = await fetch('/api/log?' + searchParams);
             if(!res.ok) throw res.statusText;
             const json = await res.json() as (GetLogSuccessResponse | GetLogErrorResponse);
 

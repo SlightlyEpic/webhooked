@@ -32,7 +32,7 @@ export default function Header() {
                         Settings
                     </DropdownMenuItem>
                 </Link>
-                <Link href='/api/v1/auth/signout'>
+                <Link href='/api/auth/signout'>
                     <DropdownMenuItem className='cursor-pointer'>
                         <div className='text-rose-500 font-medium'>Logout</div>
                     </DropdownMenuItem>

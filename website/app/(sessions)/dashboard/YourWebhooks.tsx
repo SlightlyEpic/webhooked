@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { type GetWebhooksErrorResponse, type GetWebhooksSuccessResponse } from '@/app/api/v1/webhooks/route';
+import { type GetWebhooksErrorResponse, type GetWebhooksSuccessResponse } from '@/app/api/webhooks/route';
 import { Card, CardDescription, CardTitle } from '@/components/shadcn/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/shadcn/ui/button';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/shadcn/ui/badge';
 import { LogSkeleton } from '@/components/dashboard/skeletons/LogSkeleton';
 
 const fetchWebhooks = async () => {
-    const res = await fetch('/api/v1/webhooks');
+    const res = await fetch('/api/webhooks');
     if (!res.ok) throw res.statusText;
     const json = await res.json() as (GetWebhooksSuccessResponse | GetWebhooksErrorResponse);
     if ('error' in json) throw json.error;

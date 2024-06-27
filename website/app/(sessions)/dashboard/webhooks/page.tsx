@@ -1,8 +1,8 @@
 'use client';
 
-import { PatchWebhookErrorResponse, PatchWebhookSuccessResponse } from '@/app/api/v1/webhook/[webhookId]/route';
-import { PostWebhookErrorResponse, PostWebhookSuccessResponse } from '@/app/api/v1/webhook/route';
-import { GetWebhooksErrorResponse, GetWebhooksSuccessResponse } from '@/app/api/v1/webhooks/route';
+import { PatchWebhookErrorResponse, PatchWebhookSuccessResponse } from '@/app/api/webhook/[webhookId]/route';
+import { PostWebhookErrorResponse, PostWebhookSuccessResponse } from '@/app/api/webhook/route';
+import { GetWebhooksErrorResponse, GetWebhooksSuccessResponse } from '@/app/api/webhooks/route';
 import WebhookCard from '@/components/dashboard/WebhookCard';
 import { Card } from '@/components/shadcn/ui/card';
 import { MakeStringType } from '@/lib/util/types';
@@ -17,7 +17,7 @@ import NewWebhookInput, { type NewWebhookPartial } from '@/components/dashboard/
 import { toast } from 'sonner';
 
 const fetchWebhooks = async () => {
-    const res = await fetch('/api/v1/webhooks');
+    const res = await fetch('/api/webhooks');
     if (!res.ok) throw res.statusText;
     const json = await res.json() as (GetWebhooksSuccessResponse | GetWebhooksErrorResponse);
     if ('error' in json) throw json.error;
@@ -26,7 +26,7 @@ const fetchWebhooks = async () => {
 };
 
 const createWebhook = async (webhook: NewWebhookPartial) => {
-    const res = await fetch('/api/v1/webhook', {
+    const res = await fetch('/api/webhook', {
         method: 'POST',
         body: JSON.stringify(webhook)
     });
@@ -38,7 +38,7 @@ const createWebhook = async (webhook: NewWebhookPartial) => {
 };
 
 const deleteWebhook = async (id: string) => {
-    const res = await fetch(`/api/v1/webhook/${id}`, {
+    const res = await fetch(`/api/webhook/${id}`, {
         method: 'DELETE',
     });
     if (!res.ok) throw res.statusText;
@@ -50,7 +50,7 @@ const deleteWebhook = async (id: string) => {
 
 const updateWebhook = async (webhook: MakeStringType<WebhookInfo, '_id' | 'ownerId' | 'created'>) => {
     const id = webhook._id;
-    const res = await fetch(`/api/v1/webhook/${id}`, {
+    const res = await fetch(`/api/webhook/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(webhook)
     });

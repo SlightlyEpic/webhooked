@@ -1,7 +1,7 @@
 'use client';
 
-import { GetLogsErrorResponse, GetLogsSuccessResponse } from '@/app/api/v1/logs/route';
-import type { GetWebhooksSuccessResponse, GetWebhooksErrorResponse } from '@/app/api/v1/webhooks/route';
+import { GetLogsErrorResponse, GetLogsSuccessResponse } from '@/app/api/logs/route';
+import type { GetWebhooksSuccessResponse, GetWebhooksErrorResponse } from '@/app/api/webhooks/route';
 import { DatePicker } from '@/components/dashboard/DatePicker';
 import { LogSkeleton } from '@/components/dashboard/skeletons/LogSkeleton';
 import { Button } from '@/components/shadcn/ui/button';
@@ -53,7 +53,7 @@ export default function LogsPage() {
 
             const paramsString = params.toString();
 
-            const res = await fetch(`/api/v1/logs${paramsString ? '?' : ''}${paramsString}`);
+            const res = await fetch(`/api/logs${paramsString ? '?' : ''}${paramsString}`);
             if(!res.ok) throw res.statusText;
             const json = await res.json() as (GetLogsSuccessResponse | GetLogsErrorResponse);
             if('error' in json) throw json.error;
@@ -67,7 +67,7 @@ export default function LogsPage() {
     const webhooksQuery = useQuery<GetWebhooksSuccessResponse>({
         queryKey: ['webhooks', 'all'],
         queryFn: async () => {
-            const res = await fetch('/api/v1/webhooks');
+            const res = await fetch('/api/webhooks');
             if(!res.ok) throw res.statusText;
             const json = await res.json() as (GetWebhooksSuccessResponse | GetWebhooksErrorResponse);
             if('error' in json) throw json.error;
